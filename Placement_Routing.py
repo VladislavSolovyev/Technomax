@@ -3,7 +3,6 @@ import tempfile
 import os
 
 
-
 class Coordinate:
     def __init__(self, x, y):
         self.x = x
@@ -280,3 +279,4 @@ with open(storage_path, 'w') as f:
         f.write('\n')
     print(os.path.dirname(storage_path))
 
+# Another try
