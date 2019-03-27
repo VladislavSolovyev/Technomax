@@ -242,6 +242,10 @@ def _main():
 
     a = []
 
+    from Technomax.Sequence_Pair_Testing import Calculate
+    figures = Calculate.figures_SP()
+
+    '''
     # Запускаем фигуры на площадку
     with open('input.txt', 'r') as f:
         # TODO добавляю фигуры меня значение range()
@@ -254,10 +258,16 @@ def _main():
                 a = area.figure_adding(figure)
             else:
                 print('Finish point cannot be upper than start point')
+    '''
+    for figure in figures:
+        print('Enter start and finish point of figure: ')
+        # coord = list(map(int, input().split()))
+        a = area.figure_adding(figure)
+
 
     # Запускаем конвейер. Количество конвейеров в функции range
     with open('input.txt', 'r') as f:
-        for _ in range(1):
+        for _ in range(0):
             coord = list(map(int, f.readline().split()))
             if coordinates_checker(Coordinate(coord[0], coord[1]), Coordinate(coord[2], coord[3])):
                 figure = Figure(Coordinate(coord[0], coord[1]), Coordinate(coord[2], coord[3]))

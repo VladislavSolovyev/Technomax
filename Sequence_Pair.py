@@ -107,4 +107,5 @@ for i in range(len(X)):
 
 y_SP_coordinates = P
 
+print(x_SP_coordinates)
 print(y_SP_coordinates)

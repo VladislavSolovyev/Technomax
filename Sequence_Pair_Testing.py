@@ -81,10 +81,10 @@ for i in range(len(X)):
     b = X[i]
     p = match.y[b]
     P[b - 1] = L[p]
-    t = P[b - 1] + wid_hei_dict[b][0]
+    tmp = P[b - 1] + wid_hei_dict[b][0]
     for j in range(p, len(X)):
-        if t > L[j]:
-            L[j] = t
+        if tmp > L[j]:
+            L[j] = tmp
         else:
             break
 x_SP_coordinates = P
@@ -105,10 +105,10 @@ for i in range(len(X)):
     b = XR[i]
     p = match.y[b]
     P[b - 1] = L[p]
-    t = P[b - 1] + wid_hei_dict[b][1]
+    tmp = P[b - 1] + wid_hei_dict[b][1]
     for j in range(p, len(X)):
-        if t > L[j]:
-            L[j] = t
+        if tmp > L[j]:
+            L[j] = tmp
         else:
             break
 
@@ -124,14 +124,22 @@ a = []
 
 # TODO Уперся в то, что надо переделать инициализацию фигуры
 
-for i in range(8):
-    figure = Figure(
-        Coordinate(
-            x_SP_coordinates[i],
-            y_SP_coordinates[i]
-        ),
-        Coordinate(
-            x_SP_coordinates[i] + wid_hei_dict[i + 1][0],
-            y_SP_coordinates[i] + wid_hei_dict[i + 1][1]
-        )
-    )
+
+class Calculate:
+    @staticmethod
+    def figures_SP():
+        figures = []
+        for i in range(8):
+            figure = Figure(
+                Coordinate(
+                    x_SP_coordinates[i],
+                    y_SP_coordinates[i]
+                ),
+                Coordinate(
+                    x_SP_coordinates[i] + wid_hei_dict[i + 1][1],
+                    y_SP_coordinates[i] + wid_hei_dict[i + 1][0]
+                )
+            )
+            figures.append(figure)
+        return figures
+
