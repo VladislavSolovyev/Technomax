@@ -90,10 +90,11 @@ class Routing:
 
             # TODO Рскрытие потомков влияет на работу поиска на графе
             coordinates = [
-                Coordinate(self.coordinate.x, self.coordinate.y + 1),
-                Coordinate(self.coordinate.x, self.coordinate.y - 1),
                 Coordinate(self.coordinate.x + 1, self.coordinate.y),
                 Coordinate(self.coordinate.x - 1, self.coordinate.y),
+                Coordinate(self.coordinate.x, self.coordinate.y + 1),
+                Coordinate(self.coordinate.x, self.coordinate.y - 1),
+
             ]
             for coordinate in coordinates:
                 child = self.generate_child(coordinate, area)
@@ -256,11 +257,14 @@ def _main():
     a = area.figure_adding(figures[2])
     a = area.figure_adding(figures[3])
     a = area.figure_adding(figures[7])
+
+    a = area.conveyor_adding(Coordinate(4, 1), Coordinate(9, 5))
+
     '''for figure in figures:
         print('Enter start and finish point of figure: ')
         # coord = list(map(int, input().split()))
         a = area.figure_adding(figure)'''
-    
+    '''
     # Запускаем конвейер. Количество конвейеров в функции range
     with open('input.txt', 'r') as f:
         for _ in range(0):
@@ -271,7 +275,7 @@ def _main():
                 a = area.conveyor_adding(Coordinate(4, 1), Coordinate(21, 21))
             else:
                 print('Finish point cannot be upper than start point')
-
+    '''
 
     storage_path = os.path.join(tempfile.gettempdir(), 'map.txt')
 
@@ -299,6 +303,7 @@ def _main():
             f.write('\n')
 
     print(os.path.dirname(storage_path))
+    
 
 if __name__ == "__main__":
     _main()
