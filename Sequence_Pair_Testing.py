@@ -1,4 +1,4 @@
-import Placement_Routing
+from Technomax.Placement_Routing import Figure, Coordinate, Area
 
 
 # TODO Файлик для теста разных SP, протестированы с телеги и Вонговский
@@ -118,21 +118,20 @@ print(y_SP_coordinates)
 coordinates_for_placement = [x_SP_coordinates, y_SP_coordinates]
 
 
-area = Placement_Routing.Area()
+area = Area()
 area.draw_map(25, 40)
 a = []
 
 # TODO Уперся в то, что надо переделать инициализацию фигуры
 
 for i in range(8):
-    figure = Placement_Routing.Figure(
-        Placement_Routing.Coordinate(
+    figure = Figure(
+        Coordinate(
             x_SP_coordinates[i],
             y_SP_coordinates[i]
         ),
-        Placement_Routing.Coordinate(
+        Coordinate(
             x_SP_coordinates[i] + wid_hei_dict[i + 1][0],
             y_SP_coordinates[i] + wid_hei_dict[i + 1][1]
         )
     )
-    a = area.figure_adding(figure)

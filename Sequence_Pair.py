@@ -106,4 +106,5 @@ for i in range(len(X)):
             break
 
 y_SP_coordinates = P
+
 print(y_SP_coordinates)
