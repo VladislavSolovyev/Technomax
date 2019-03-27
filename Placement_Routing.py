@@ -33,15 +33,13 @@ class Figure:
         delta_x = self.finish_point.x - self.start_point.x
         delta_y = self.finish_point.y - self.start_point.y
         '''
-        
+        u ----------- f ----- y 
+        |             |
+        |             |
+        s ----------- b
         x
         |
         |
-        u ----------- f 
-        |             |
-        |             |
-        s ----------- b ----- y
-        
         '''
         s = self.start_point
         f = self.finish_point
@@ -203,7 +201,7 @@ class Area:
     # TODO это статический метод другого класса
 
     def conveyor_adding(self, coordinate_from, coordinate_to):
-        path = Routing.get_path(area, coordinate_from, coordinate_to)
+        path = Routing.get_path(self, coordinate_from, coordinate_to)
         print(len(path))
 
         # Добавление происходит поэлементной проходкой по Area
@@ -232,15 +230,9 @@ def coordinates_checker(start_point, finish_point):
     return False
 
 
-area = Area()
-area.draw_map(25, 40)
-
-
-
-
 def _main():
-
-    a = []
+    area = Area()
+    area.draw_map(25, 40)
 
     from Technomax.Sequence_Pair_Testing import Calculate
     figures = Calculate.figures_SP()
@@ -263,12 +255,12 @@ def _main():
     a = area.figure_adding(figures[1])
     a = area.figure_adding(figures[2])
     a = area.figure_adding(figures[3])
+    a = area.figure_adding(figures[7])
     '''for figure in figures:
         print('Enter start and finish point of figure: ')
         # coord = list(map(int, input().split()))
         a = area.figure_adding(figure)'''
-
-
+    
     # Запускаем конвейер. Количество конвейеров в функции range
     with open('input.txt', 'r') as f:
         for _ in range(0):
@@ -279,6 +271,7 @@ def _main():
                 a = area.conveyor_adding(Coordinate(4, 1), Coordinate(21, 21))
             else:
                 print('Finish point cannot be upper than start point')
+
 
     storage_path = os.path.join(tempfile.gettempdir(), 'map.txt')
 
@@ -306,7 +299,6 @@ def _main():
             f.write('\n')
 
     print(os.path.dirname(storage_path))
-
 
 if __name__ == "__main__":
     _main()
