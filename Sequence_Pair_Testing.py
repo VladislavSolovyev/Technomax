@@ -136,8 +136,8 @@ class Calculate:
                     y_SP_coordinates[i]
                 ),
                 Coordinate(
-                    x_SP_coordinates[i] + wid_hei_dict[i + 1][1],
-                    y_SP_coordinates[i] + wid_hei_dict[i + 1][0]
+                    x_SP_coordinates[i] + wid_hei_dict[i + 1][0] - 1,
+                    y_SP_coordinates[i] + wid_hei_dict[i + 1][1] - 1
                 )
             )
             figures.append(figure)

@@ -259,10 +259,14 @@ def _main():
             else:
                 print('Finish point cannot be upper than start point')
     '''
-    for figure in figures:
+    a = area.figure_adding(figures[0])
+    a = area.figure_adding(figures[1])
+    a = area.figure_adding(figures[2])
+    a = area.figure_adding(figures[3])
+    '''for figure in figures:
         print('Enter start and finish point of figure: ')
         # coord = list(map(int, input().split()))
-        a = area.figure_adding(figure)
+        a = area.figure_adding(figure)'''
 
 
     # Запускаем конвейер. Количество конвейеров в функции range
