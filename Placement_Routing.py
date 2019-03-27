@@ -32,18 +32,20 @@ class Figure:
     def create_figure_queue(self):
         delta_x = self.finish_point.x - self.start_point.x
         delta_y = self.finish_point.y - self.start_point.y
-
         '''
-        s ----------- u ----- y
-        |             |
-        |             |
-        b ----------- f
-        |
-        |
+        
         x
+        |
+        |
+        u ----------- f 
+        |             |
+        |             |
+        s ----------- b ----- y
+        
         '''
         s = self.start_point
         f = self.finish_point
+
         b = Coordinate(
             self.finish_point.x,
             self.start_point.y
@@ -53,7 +55,7 @@ class Figure:
             self.finish_point.y
         )
 
-        # TODO Далее начинаю создавать тьюплы. Зачем, если есть класс Coordinate? - чтобы сортирнуть
+        # TODO Далее начинаю создавать тьюплы. Зачем, если есть класс Coordinate? - чтобы сортировать
 
         iter_x = s.x
         for _ in range(delta_x):
@@ -75,7 +77,7 @@ class Figure:
 
 class Routing:
     class Node:
-        def __init__(self, parent, coordinate):  # У узла 2 параметра: родитель и координата
+        def __init__(self, parent, coordinate):  # У узла 2 параметра: имя родителя и координата родителя
             self.parent = parent
             self.coordinate = coordinate
             self.f = 0.0  # Оценочная функция
@@ -87,6 +89,8 @@ class Routing:
 
         def generate_children(self, area):  # Открываем потомков
             children = []
+
+            # TODO Рскрытие потомков влияет на работу поиска на графе
             coordinates = [
                 Coordinate(self.coordinate.x, self.coordinate.y + 1),
                 Coordinate(self.coordinate.x, self.coordinate.y - 1),
@@ -174,7 +178,7 @@ class Area:
         self.height = len(self.passabilities)  # Количество строчек на карте
 
     def draw_map(self, height, width):
-        self.passabilities = [[0 for j in range(width)] for i in range(height)]
+        self.passabilities = [[0 for j in range(width)] for i in range(height)]  # Заполнение нулями матрицы-карты
         self.height = height
         self.width = width
         return self.passabilities
@@ -183,15 +187,15 @@ class Area:
         return self.passabilities[coordinate.x][coordinate.y]  # Возвращает координату (x,y) точки
 
     def figure_adding(self, new_figure):
-        list_of_walls = new_figure.create_figure_queue()
+        list_of_figs = new_figure.create_figure_queue()
         # print(list_of_walls)
-        # Добавление происходит поэлементной проходкой по Area
-        for _ in range(len(list_of_walls)):
-            buf = list_of_walls.pop()
+        # Добавление происходит проходясь по списку тьюплов list_of_figs
+        for _ in range(len(list_of_figs)):
+            buf = list_of_figs.pop()
             self.passabilities[buf[0]][buf[1]] = -1
         # Добавляем вход/выход агрегатам
-        #self.passabilities[new_figure.in_point.x][new_figure.in_point.y] = -3
-        #self.passabilities[new_figure.out_point.x][new_figure.out_point.y] = -4
+        # self.passabilities[new_figure.in_point.x][new_figure.in_point.y] = -3
+        # self.passabilities[new_figure.out_point.x][new_figure.out_point.y] = -4
 
         return self.passabilities
 
@@ -235,7 +239,7 @@ a = []
 # Запускаем фигуры на площадку
 with open('input.txt', 'r') as f:
     # TODO добавляю фигуры меня значение range()
-    for _ in range(0):
+    for _ in range(1):
         print('Enter start and finish point of figure: ')
         # coord = list(map(int, input().split()))
         coord = list(map(int, f.readline().split()))
@@ -258,6 +262,9 @@ with open('input.txt', 'r') as f:
             print('Finish point cannot be upper than start point')
 
 storage_path = os.path.join(tempfile.gettempdir(), 'map.txt')
+
+
+a.reverse()
 open(storage_path, 'w').close()
 
 with open(storage_path, 'w') as f:
@@ -277,6 +284,7 @@ with open(storage_path, 'w') as f:
                 f.write(' {}'.format(a[i][j]))
                 # print(' {}'.format(a[i][j]), end=' ')
         f.write('\n')
-    print(os.path.dirname(storage_path))
+    
 
+print(os.path.dirname(storage_path))
 # Another try
