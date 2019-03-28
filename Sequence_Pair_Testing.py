@@ -97,7 +97,6 @@ class SimAnnealing:
 
     def __init__(self, init_temperature, frozen_temperature):
         self.temperature = init_temperature
-        # self.seq_pair = seq_pair
         self.frozen = frozen_temperature
 
     # TODO Оказалось это должны быть методы класса, т.к. экземпляр класса для их ф-ала создавать не обязательно
