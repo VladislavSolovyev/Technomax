@@ -37,21 +37,12 @@ class Figure:
         |             |
         |             |
         s ----------- b
+        |
+        |
         x
-        |
-        |
         '''
         s = self.start_point
         f = self.finish_point
-
-        b = Coordinate(
-            self.finish_point.x,
-            self.start_point.y
-        )
-        u = Coordinate(
-            self.start_point.x,
-            self.finish_point.y
-        )
 
         # TODO Далее начинаю создавать тьюплы. Зачем, если есть класс Coordinate? - чтобы сортировать
 
@@ -212,18 +203,6 @@ class Area:
         # print(list_of_walls)
         return self.passabilities
 
-    '''
-    def to_string_figure(self, coordinate_corner, dimension):
-        result = ''
-        coordinate = Coordinate(0, 0)
-        for passabilities_row in self.passabilities:  # passability_row - это список-строчка
-            if result:
-                result += '\n'
-            for passability in passabilities_row:
-                if coordinate_corner == coordinate:
-                    result += '  #'
-    '''
-
 
 def coordinates_checker(start_point, finish_point):
     if start_point.x <= finish_point.x and start_point.y <= finish_point.y:
@@ -303,7 +282,7 @@ def _main():
             f.write('\n')
 
     print(os.path.dirname(storage_path))
-    
+
 
 if __name__ == "__main__":
     _main()
