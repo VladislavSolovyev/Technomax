@@ -232,12 +232,18 @@ def _main():
                 print('Finish point cannot be upper than start point')
     '''
     a = area.figure_adding(figures[0])
-    a = area.figure_adding(figures[1])
-    a = area.figure_adding(figures[2])
-    a = area.figure_adding(figures[3])
-    a = area.figure_adding(figures[7])
+    #a = area.figure_adding(figures[1])
+    #a = area.figure_adding(figures[2])
+    #a = area.figure_adding(figures[3])
+    # TODO Индекс здесь не совпадает с индексом словаря. Сделать keys стрингами
+    #a = area.figure_adding(figures[6])
+    #a = area.figure_adding(figures[7])
+    for i in range(1, len(figures)):
+       a = area.figure_adding(figures[i])
 
-    a = area.conveyor_adding(Coordinate(4, 1), Coordinate(9, 5))
+
+
+    #a = area.conveyor_adding(Coordinate(4, 1), Coordinate(9, 5))
 
     '''for figure in figures:
         print('Enter start and finish point of figure: ')

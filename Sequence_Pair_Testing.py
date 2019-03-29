@@ -62,7 +62,7 @@ class SeqPair:
                 else:
                     break
         x_SP_coordinates = P
-        print(x_SP_coordinates)
+        #print(x_SP_coordinates)
 
         # ALGORITHM for y coordinate:
         P = [0 for _ in range(len(self.X))]
@@ -88,7 +88,7 @@ class SeqPair:
                     break
 
         y_SP_coordinates = P
-        print(y_SP_coordinates)
+        #print(y_SP_coordinates)
 
         return [x_SP_coordinates, y_SP_coordinates]
 
@@ -104,6 +104,7 @@ class SimAnnealing:
     def m1_perturb(self, seq_pair):
         rand_ind1 = random.randrange(0, len(seq_pair.X))
         rand_ind2 = random.randrange(0, len(seq_pair.X))
+
         while rand_ind1 == rand_ind2:
             rand_ind2 = random.randrange(0, len(seq_pair.X))
         seq_pair.X[rand_ind1], seq_pair.X[rand_ind2] = seq_pair.X[rand_ind2], seq_pair.X[rand_ind1]
@@ -111,23 +112,28 @@ class SimAnnealing:
         return seq_pair
 
     def m2_perturb(self, seq_pair):
-        rand_ind1 = random.randrange(0, len(seq_pair.X))
-        rand_ind2 = random.randrange(0, len(seq_pair.X))
+        #rand_ind1 = random.randrange(0, len(seq_pair.X))
+        rand_ind1 = 1
+        #rand_ind2 = random.randrange(0, len(seq_pair.X))
+        rand_ind2 = 6
         while rand_ind1 == rand_ind2:
             rand_ind2 = random.randrange(0, len(seq_pair.X))
-
         seq_pair.X[rand_ind1], seq_pair.X[rand_ind2] = seq_pair.X[rand_ind2], seq_pair.X[rand_ind1]
-        seq_pair.Y[rand_ind1], seq_pair.Y[rand_ind2] = seq_pair.Y[rand_ind2], seq_pair.Y[rand_ind1]
+
+        ind1 = seq_pair.Y.index(seq_pair.X[rand_ind2])
+        ind2 = seq_pair.Y.index(seq_pair.X[rand_ind1])
+        seq_pair.Y[ind1], seq_pair.Y[ind2] = seq_pair.Y[ind2], seq_pair.Y[ind1]
 
         return seq_pair
 
     def m3_perturb(self, seq_pair):
         rand_ind = random.randrange(0, len(seq_pair.X))
-
         seq_pair.wid_hei_dict[rand_ind][0], seq_pair.wid_hei_dict[rand_ind][1] = \
             seq_pair.wid_hei_dict[rand_ind][1], seq_pair.wid_hei_dict[rand_ind][0]
 
         return seq_pair
+
+    #def get_cost(self, ):
 
 """
 ### Rules ###
@@ -170,7 +176,7 @@ init_seq_pair = SeqPair(X, Y, wid_hei_dict)
 sim_ann = SimAnnealing(1000, 2)
 
 # m1_perturb глобально меняет seq_pair
-new_p = sim_ann.m1_perturb(init_seq_pair)
+new_p = sim_ann.m2_perturb(init_seq_pair)
 
 x_SP_coordinates = init_seq_pair.find_SP_coordinates()[0]
 y_SP_coordinates = init_seq_pair.find_SP_coordinates()[1]
@@ -180,7 +186,7 @@ class Calculate:
     @staticmethod
     def figures_SP():
         figures = []
-        for i in range(8):
+        for i in range(len(init_seq_pair.X)):
             figure = Figure(
                 Coordinate(
                     x_SP_coordinates[i],
