@@ -239,7 +239,7 @@ def _main():
     #a = area.figure_adding(figures[6])
     #a = area.figure_adding(figures[7])
     for i in range(1, len(figures)):
-       a = area.figure_adding(figures[i])
+        a = area.figure_adding(figures[i])
 
 
 

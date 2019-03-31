@@ -101,7 +101,8 @@ class SimAnnealing:
 
     # TODO Оказалось это должны быть методы класса, т.к. экземпляр класса для их ф-ала создавать не обязательно
     # TODO Методы при каждом вызове меняют seq_pair глобально
-    def m1_perturb(self, seq_pair):
+    @classmethod
+    def m1_perturb(cls, seq_pair):
         rand_ind1 = random.randrange(0, len(seq_pair.X))
         rand_ind2 = random.randrange(0, len(seq_pair.X))
 
@@ -111,10 +112,11 @@ class SimAnnealing:
 
         return seq_pair
 
-    def m2_perturb(self, seq_pair):
-        #rand_ind1 = random.randrange(0, len(seq_pair.X))
-        rand_ind1 = 1
-        #rand_ind2 = random.randrange(0, len(seq_pair.X))
+    @classmethod
+    def m2_perturb(cls, seq_pair):
+        # rand_ind1 = random.randrange(0, len(seq_pair.X))
+        rand_ind1 = 1  # Соответсвует седьмой фигуре
+        # rand_ind2 = random.randrange(0, len(seq_pair.X))
         rand_ind2 = 6
         while rand_ind1 == rand_ind2:
             rand_ind2 = random.randrange(0, len(seq_pair.X))
@@ -126,14 +128,45 @@ class SimAnnealing:
 
         return seq_pair
 
-    def m3_perturb(self, seq_pair):
+    @classmethod
+    def m3_perturb(cls, seq_pair):
         rand_ind = random.randrange(0, len(seq_pair.X))
         seq_pair.wid_hei_dict[rand_ind][0], seq_pair.wid_hei_dict[rand_ind][1] = \
             seq_pair.wid_hei_dict[rand_ind][1], seq_pair.wid_hei_dict[rand_ind][0]
 
         return seq_pair
 
-    #def get_cost(self, ):
+    # Манхетонское расстояние между центрами фигур
+    @classmethod
+    def get_cost(cls, seq_pair):
+        total_wire_length = 0
+        start_points_x = seq_pair.find_SP_coordinates()[0]
+        start_points_y = seq_pair.find_SP_coordinates()[1]
+
+        def get_central_point(k):
+            finish_point_x = start_points_x[k] + seq_pair.wid_hei_dict[k + 1][0] - 1
+            finish_point_y = start_points_y[k] + seq_pair.wid_hei_dict[k + 1][1] - 1
+
+            central_point_x = (finish_point_x + start_points_x[k]) / 2
+            central_point_y = (finish_point_y + start_points_y[k]) / 2
+
+            return Coordinate(central_point_x, central_point_y)
+
+        tmp_list = []
+        for i in range(len(start_points_x)):
+            j = i
+            while j < len(start_points_x):
+                total_wire_length += abs(get_central_point(i).x - get_central_point(j).x) + \
+                                     abs(get_central_point(i).y - get_central_point(j).y)
+                j += 1
+                tmp_list.append(total_wire_length)
+            # print(
+            # get_central_point(i).x, get_central_point(i).y, ' Размеры фигуры: {}'.format(seq_pair.wid_hei_dict[i+1])
+            # )
+            print(tmp_list)
+
+        return total_wire_length
+
 
 """
 ### Rules ###
@@ -147,14 +180,13 @@ bj in XR and before bj in Y , and
 after bj in X and before bj in Y
 """
 
-
 # seq_pair = [[1, 7, 4, 5, 2, 6, 3, 8], [8, 4, 7, 2, 5, 3, 6, 1]]
-
 
 X = [1, 7, 4, 5, 2, 6, 3, 8]
 Y = [8, 4, 7, 2, 5, 3, 6, 1]
 
 
+# TODO Сделать нормальные ключи для словарей
 wid_hei_dict = {
     1: [2, 4],
     2: [1, 3],
@@ -171,12 +203,11 @@ area.draw_map(25, 40)
 a = []
 
 init_seq_pair = SeqPair(X, Y, wid_hei_dict)
+print(SimAnnealing.get_cost(init_seq_pair))
 
-# Экземпляр создается ради perturb методов
-sim_ann = SimAnnealing(1000, 2)
 
 # m1_perturb глобально меняет seq_pair
-new_p = sim_ann.m2_perturb(init_seq_pair)
+# new_p = SimAnnealing.m2_perturb(init_seq_pair)
 
 x_SP_coordinates = init_seq_pair.find_SP_coordinates()[0]
 y_SP_coordinates = init_seq_pair.find_SP_coordinates()[1]
