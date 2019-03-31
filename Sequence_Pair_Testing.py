@@ -1,6 +1,7 @@
 from Technomax.Placement_Routing import Figure, Coordinate, Area
 import random
-
+import math
+import copy
 
 # TODO Файлик для теста разных SP, протестированы с телеги и Вонговский
 
@@ -114,10 +115,10 @@ class SimAnnealing:
 
     @classmethod
     def m2_perturb(cls, seq_pair):
-        # rand_ind1 = random.randrange(0, len(seq_pair.X))
-        rand_ind1 = 1  # Соответсвует седьмой фигуре
-        # rand_ind2 = random.randrange(0, len(seq_pair.X))
-        rand_ind2 = 6
+        rand_ind1 = random.randrange(0, len(seq_pair.X))
+        # rand_ind1 = 1  # Соответсвует седьмой фигуре
+        rand_ind2 = random.randrange(0, len(seq_pair.X))
+        # rand_ind2 = 6
         while rand_ind1 == rand_ind2:
             rand_ind2 = random.randrange(0, len(seq_pair.X))
         seq_pair.X[rand_ind1], seq_pair.X[rand_ind2] = seq_pair.X[rand_ind2], seq_pair.X[rand_ind1]
@@ -130,7 +131,7 @@ class SimAnnealing:
 
     @classmethod
     def m3_perturb(cls, seq_pair):
-        rand_ind = random.randrange(0, len(seq_pair.X))
+        rand_ind = random.randrange(1, len(seq_pair.X) + 1)
         seq_pair.wid_hei_dict[rand_ind][0], seq_pair.wid_hei_dict[rand_ind][1] = \
             seq_pair.wid_hei_dict[rand_ind][1], seq_pair.wid_hei_dict[rand_ind][0]
 
@@ -163,9 +164,36 @@ class SimAnnealing:
             # print(
             # get_central_point(i).x, get_central_point(i).y, ' Размеры фигуры: {}'.format(seq_pair.wid_hei_dict[i+1])
             # )
-            print(tmp_list)
+            # print(tmp_list)
 
         return total_wire_length
+
+    def sim_annealing(self, seq_pair):
+        while self.temperature > self.frozen:
+            for _ in range(1000):
+                prev_seq_pair = copy.deepcopy(seq_pair)
+                prev_cost = self.get_cost(prev_seq_pair)
+
+                if random.random() < 0.1:
+                    new_seq_pair = self.m3_perturb(seq_pair)
+                elif random.random() < 0.4:
+                    new_seq_pair = self.m2_perturb(seq_pair)
+                else:
+                    new_seq_pair = self.m1_perturb(seq_pair)
+
+                delta_cost = self.get_cost(new_seq_pair) - prev_cost
+                # TODO глобально меняет seq_pair, поэтому все PERTURB аксептятся
+                if delta_cost < 0:
+                    seq_pair = new_seq_pair
+                elif random.uniform(0, 1) > math.e ** (delta_cost / self.temperature):
+                    seq_pair = new_seq_pair
+                else:
+                    seq_pair = prev_seq_pair
+            self.temperature = float('{:.{}f}'.format(self.temperature, 10000000)) * 0.5
+
+        print(self.get_cost(seq_pair))
+        return seq_pair
+
 
 
 """
@@ -205,12 +233,17 @@ a = []
 init_seq_pair = SeqPair(X, Y, wid_hei_dict)
 print(SimAnnealing.get_cost(init_seq_pair))
 
-
 # m1_perturb глобально меняет seq_pair
 # new_p = SimAnnealing.m2_perturb(init_seq_pair)
 
-x_SP_coordinates = init_seq_pair.find_SP_coordinates()[0]
-y_SP_coordinates = init_seq_pair.find_SP_coordinates()[1]
+#x_SP_coordinates = init_seq_pair.find_SP_coordinates()[0]
+#y_SP_coordinates = init_seq_pair.find_SP_coordinates()[1]
+
+annealed_seq_pair = SimAnnealing(40000, 3)
+x_y_SA = annealed_seq_pair.sim_annealing(init_seq_pair).find_SP_coordinates()
+
+x_SA_coordinates = x_y_SA[0]
+y_SA_coordinates = x_y_SA[1]
 
 
 class Calculate:
@@ -220,12 +253,12 @@ class Calculate:
         for i in range(len(init_seq_pair.X)):
             figure = Figure(
                 Coordinate(
-                    x_SP_coordinates[i],
-                    y_SP_coordinates[i]
+                    x_SA_coordinates[i],
+                    y_SA_coordinates[i]
                 ),
                 Coordinate(
-                    x_SP_coordinates[i] + wid_hei_dict[i + 1][0] - 1,
-                    y_SP_coordinates[i] + wid_hei_dict[i + 1][1] - 1
+                    x_SA_coordinates[i] + wid_hei_dict[i + 1][0] - 1,
+                    y_SA_coordinates[i] + wid_hei_dict[i + 1][1] - 1
                 )
             )
             figures.append(figure)
