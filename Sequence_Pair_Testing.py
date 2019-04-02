@@ -104,6 +104,13 @@ class SimAnnealing:
 
     # TODO Оказалось это должны быть методы класса, т.к. экземпляр класса для их ф-ала создавать не обязательно
     # TODO Методы при каждом вызове меняют seq_pair глобально
+
+    @classmethod
+    def m0_perturb(cls, seq_pair):
+        random.shuffle(seq_pair.X)
+        random.shuffle(seq_pair.Y)
+        return seq_pair
+
     @classmethod
     def m1_perturb(cls, seq_pair):
         rand_ind1 = random.randrange(0, len(seq_pair.X))
@@ -143,17 +150,29 @@ class SimAnnealing:
     @classmethod
     def get_cost(cls, seq_pair):
         total_wire_length = 0
+        penalty = 0  # Если между блоками нет расстояния
         start_points_x = seq_pair.find_SP_coordinates()[0]
         start_points_y = seq_pair.find_SP_coordinates()[1]
 
         def get_central_point(k):
-            finish_point_x = start_points_x[k] + seq_pair.wid_hei_dict[k + 1][0] - 1
-            finish_point_y = start_points_y[k] + seq_pair.wid_hei_dict[k + 1][1] - 1
+            f_x = start_points_x[k] + seq_pair.wid_hei_dict[k + 1][0] - 1
+            f_y = start_points_y[k] + seq_pair.wid_hei_dict[k + 1][1] - 1
 
-            central_point_x = (finish_point_x + start_points_x[k]) / 2
-            central_point_y = (finish_point_y + start_points_y[k]) / 2
+            central_point_x = (f_x + start_points_x[k]) / 2
+            central_point_y = (f_y + start_points_y[k]) / 2
 
             return Coordinate(central_point_x, central_point_y)
+
+        def not_intersect_delta(i, j, delta):
+
+            f_x = start_points_x[i] + seq_pair.wid_hei_dict[i + 1][0] - 1
+            f_y = start_points_y[i] + seq_pair.wid_hei_dict[i + 1][1] - 1
+
+            f_sh_x = start_points_x[j] + seq_pair.wid_hei_dict[j + 1][0] - 1
+            f_sh_y = start_points_y[j] + seq_pair.wid_hei_dict[j + 1][1] - 1
+
+            return (f_sh_x < start_points_x[i] - delta) and (start_points_y[j] > f_y + delta) and \
+                   (start_points_x[j] > f_x + delta) and (f_sh_y < start_points_y[i] - delta)
 
         tmp_list = []
         for i in range(len(start_points_x)):
@@ -161,24 +180,31 @@ class SimAnnealing:
             while j < len(start_points_x):
                 total_wire_length += abs(get_central_point(i).x - get_central_point(j).x) + \
                                      abs(get_central_point(i).y - get_central_point(j).y)
+                # TODO добавю вл. цикл. Протестить существенно ли влияние на время
+                # Вставить код сюда:
+                if not not_intersect_delta(i, j, 2):
+                    penalty += 1000
+                #
                 j += 1
-                tmp_list.append(total_wire_length)
+                # tmp_list.append(total_wire_length)
             # print(
             # get_central_point(i).x, get_central_point(i).y, ' Размеры фигуры: {}'.format(seq_pair.wid_hei_dict[i+1])
             # )
             # print(tmp_list)
 
-        return total_wire_length
+        return total_wire_length + penalty
 
     def sim_annealing(self, seq_pair):
         while self.temperature > self.frozen:
-            for _ in range(100):
+            for _ in range(1000):
                 prev_seq_pair = copy.deepcopy(seq_pair)
                 prev_cost = self.get_cost(prev_seq_pair)
 
-                if random.random() < 0.1:
+                if random.random() < 0.9:
+                    new_seq_pair = self.m0_perturb(seq_pair)
+                elif random.random() < 0.10:
                     new_seq_pair = self.m3_perturb(seq_pair)
-                elif random.random() < 0.4:
+                elif random.random() < 0.20:
                     new_seq_pair = self.m2_perturb(seq_pair)
                 else:
                     new_seq_pair = self.m1_perturb(seq_pair)
@@ -229,7 +255,7 @@ wid_hei_dict = {
 }
 
 area = Area()
-area.draw_map(25, 40)
+area.draw_map(50, 60)
 a = []
 
 init_seq_pair = SeqPair(X, Y, wid_hei_dict)
@@ -241,8 +267,9 @@ print(SimAnnealing.get_cost(init_seq_pair))
 #x_SP_coordinates = init_seq_pair.find_SP_coordinates()[0]
 #y_SP_coordinates = init_seq_pair.find_SP_coordinates()[1]
 
-annealed_seq_pair = SimAnnealing(400, 3)
+annealed_seq_pair = SimAnnealing(400000, 3)
 x_y_SA = annealed_seq_pair.sim_annealing(init_seq_pair).find_SP_coordinates()
+
 
 # TODO провести серию экспериментов и найти такие параметры, при которых изменение cost'ов < 5%
 class Calculate:
