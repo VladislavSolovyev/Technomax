@@ -42,6 +42,8 @@ class SeqPair:
         for i in range(len(self.X)):
             for j in range(len(self.X)):
                 if self.X[i] == self.Y[j]:
+                    # ключ - Название фигуры, значение - индекс в последовательности
+                    # в match попадают когда сошлись фигуры в одном списке и другом
                     match.x.update({self.X[i]: i})
                     match.y.update({self.Y[j]: j})
 
@@ -170,7 +172,7 @@ class SimAnnealing:
 
     def sim_annealing(self, seq_pair):
         while self.temperature > self.frozen:
-            for _ in range(1000):
+            for _ in range(100):
                 prev_seq_pair = copy.deepcopy(seq_pair)
                 prev_cost = self.get_cost(prev_seq_pair)
 
@@ -189,7 +191,7 @@ class SimAnnealing:
                     seq_pair = new_seq_pair
                 else:
                     seq_pair = prev_seq_pair
-            self.temperature = float('{:.{}f}'.format(self.temperature, 10000000)) * 0.5
+            self.temperature = float('{:.{}f}'.format(self.temperature, 100000)) * 0.5
 
         print(self.get_cost(seq_pair))
         return seq_pair
@@ -216,14 +218,14 @@ Y = [8, 4, 7, 2, 5, 3, 6, 1]
 
 # TODO Сделать нормальные ключи для словарей
 wid_hei_dict = {
-    1: [2, 4],
-    2: [1, 3],
-    3: [3, 3],
-    4: [3, 5],
-    5: [3, 2],
-    6: [5, 3],
-    7: [1, 2],
-    8: [2, 4],
+    1: [2, 4, 'АХПП'],
+    2: [1, 3, 'Печь'],
+    3: [3, 3, 'Печь_2'],
+    4: [3, 5, 'Кабина'],
+    5: [3, 2, 'Зона Загрузки'],
+    6: [5, 3, 'Зона Выгрузки'],
+    7: [1, 2, 'Курилка'],
+    8: [2, 4, 'Паркет'],
 }
 
 area = Area()
@@ -239,13 +241,10 @@ print(SimAnnealing.get_cost(init_seq_pair))
 #x_SP_coordinates = init_seq_pair.find_SP_coordinates()[0]
 #y_SP_coordinates = init_seq_pair.find_SP_coordinates()[1]
 
-annealed_seq_pair = SimAnnealing(40000, 3)
+annealed_seq_pair = SimAnnealing(400, 3)
 x_y_SA = annealed_seq_pair.sim_annealing(init_seq_pair).find_SP_coordinates()
 
-x_SA_coordinates = x_y_SA[0]
-y_SA_coordinates = x_y_SA[1]
-
-
+# TODO провести серию экспериментов и найти такие параметры, при которых изменение cost'ов < 5%
 class Calculate:
     @staticmethod
     def figures_SP():
@@ -253,12 +252,12 @@ class Calculate:
         for i in range(len(init_seq_pair.X)):
             figure = Figure(
                 Coordinate(
-                    x_SA_coordinates[i],
-                    y_SA_coordinates[i]
+                    x_y_SA[0][i],
+                    x_y_SA[1][i]
                 ),
                 Coordinate(
-                    x_SA_coordinates[i] + wid_hei_dict[i + 1][0] - 1,
-                    y_SA_coordinates[i] + wid_hei_dict[i + 1][1] - 1
+                    x_y_SA[0][i] + wid_hei_dict[i + 1][0] - 1,
+                    x_y_SA[1][i] + wid_hei_dict[i + 1][1] - 1
                 )
             )
             figures.append(figure)
