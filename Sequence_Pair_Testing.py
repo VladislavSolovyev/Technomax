@@ -199,14 +199,14 @@ class SimAnnealing:
         new_seq_pair = seq_pair
         statistics = Statistics(0, 0, 0)
         while self.temperature > self.frozen:
-            for _ in range(1000):
+            for _ in range(10):
                 prev_seq_pair = copy.deepcopy(seq_pair)
                 prev_cost = self.get_cost(prev_seq_pair)
 
-                if random.random() < 0.90:
+                if random.random() < 0.99999999:
                     new_seq_pair = self.m3_perturb(seq_pair)
-                    statistics.m3_count += 1
-                elif random.random() < 0.000040:
+                    # statistics.m3_count += 1
+                elif random.random() < 0.40:
                     new_seq_pair = self.m2_perturb(seq_pair)
                     statistics.m2_count += 1
                 else:
@@ -217,8 +217,10 @@ class SimAnnealing:
                 # TODO глобально меняет seq_pair, поэтому все PERTURB аксептятся
                 if delta_cost < 0:
                     seq_pair = new_seq_pair
+                    statistics.m3_count += 1
                 elif random.uniform(0, 1) > math.e ** (delta_cost / self.temperature):
                     seq_pair = new_seq_pair
+                    statistics.m3_count += 1
                 else:
                     seq_pair = prev_seq_pair
             self.temperature = float('{:.{}f}'.format(self.temperature, 100000)) * 0.5
@@ -273,9 +275,16 @@ print(SimAnnealing.get_cost(init_seq_pair))
 # y_SP_coordinates = init_seq_pair.find_SP_coordinates()[1]
 # x_y_SP = init_seq_pair.find_SP_coordinates()
 
-annealed_seq_pair = SimAnnealing(400000, 3)
-x_y_SA = annealed_seq_pair.sim_annealing(init_seq_pair).find_SP_coordinates()
-# x_y_SA = init_seq_pair.find_SP_coordinates()
+annealed_seq_pair = SimAnnealing(40, 3)
+# x_y_SA = annealed_seq_pair.sim_annealing(init_seq_pair).find_SP_coordinates()
+x_y_SA = init_seq_pair.find_SP_coordinates()
+
+x_y_SA = annealed_seq_pair.m3_perturb(init_seq_pair).find_SP_coordinates()
+x_y_SA = annealed_seq_pair.m3_perturb(init_seq_pair).find_SP_coordinates()
+x_y_SA = annealed_seq_pair.m3_perturb(init_seq_pair).find_SP_coordinates()
+x_y_SA = annealed_seq_pair.m3_perturb(init_seq_pair).find_SP_coordinates()
+x_y_SA = annealed_seq_pair.m3_perturb(init_seq_pair).find_SP_coordinates()
+
 
 tmp_list = [[], [], []]
 # TODO провести серию экспериментов и найти такие параметры, при которых изменение cost'ов < 5%

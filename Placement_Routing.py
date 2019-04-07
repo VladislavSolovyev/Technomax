@@ -210,6 +210,8 @@ def coordinates_checker(start_point, finish_point):
         return True
     return False
 
+from Technomax.canvas import *
+
 
 def _main():
     area = Area()
@@ -289,6 +291,7 @@ def _main():
             f.write('\n')
 
     print(os.path.dirname(storage_path))
+    Draw.figs(figures)
 
 
 if __name__ == "__main__":
