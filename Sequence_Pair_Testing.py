@@ -15,6 +15,7 @@ class Statistics:
 
 # TODO Файлик для теста разных SP, протестированы с телеги и Вонговский
 
+
 class SeqPair:
 
     def __init__(self, X, Y, wid_hei_dict, delta):
@@ -22,7 +23,7 @@ class SeqPair:
         self.Y = Y
         self.wid_hei_dict = wid_hei_dict
         self.delta = delta
-        # self.wid_hei_dict = self.modify_wid_hei_dict()
+        self.wid_hei_dict = self.modify_wid_hei_dict()
 
     def modify_wid_hei_dict(self):
         tmp_wid_hei_dict = dict()
@@ -34,7 +35,6 @@ class SeqPair:
         """
                  LCS of              LCS of
         block | (X1; Y1) | x_coor | (XR2 ; Y1) | y_coor
-
         """
         '''Block position array P[b]; b = 1...n is used to record the x or
         y coordinate of block b depending on the weight w(b) equals
@@ -71,7 +71,7 @@ class SeqPair:
         '''
         L = [0 for _ in range(len(self.X))]
 
-        #tmp_wid_hei_dict = self.modify_wid_hei_dict()
+        # tmp_wid_hei_dict = self.modify_wid_hei_dict()
 
         # ALGORITHM for x coordinate:
         for i in range(len(self.X)):
@@ -85,7 +85,7 @@ class SeqPair:
                 else:
                     break
         x_SP_coordinates = P
-        #print(x_SP_coordinates)
+        # print(x_SP_coordinates)
 
         # ALGORITHM for y coordinate:
         P = [0 for _ in range(len(self.X))]
@@ -111,22 +111,16 @@ class SeqPair:
                     break
 
         y_SP_coordinates = P
-        #print(y_SP_coordinates)
+        # print(y_SP_coordinates)
+
+        for i in range(len(x_SP_coordinates)):
+            x_SP_coordinates[i] = x_SP_coordinates[i] + self.delta
+
+        for i in range(len(y_SP_coordinates)):
+            y_SP_coordinates[i] = y_SP_coordinates[i] + self.delta
 
         # TODO Сделать обратный переход по дельте в конце выполнения
         return [x_SP_coordinates, y_SP_coordinates]
-
-    def find_true_SP_coordinates(self):
-        true_coordinates = [[], []]
-        for i in range(len(self.find_SP_coordinates()[0])):
-            self.find_SP_coordinates()[0][i] += self.delta
-            true_coordinates[0].append(self.find_SP_coordinates()[0][i])
-
-        for i in range(len(self.find_SP_coordinates()[1])):
-            self.find_SP_coordinates()[1][i] += self.delta
-            true_coordinates[1].append(self.find_SP_coordinates()[1][i])
-
-        return true_coordinates
 
 
 class SimAnnealing:
@@ -137,12 +131,6 @@ class SimAnnealing:
 
     # TODO Оказалось это должны быть методы класса, т.к. экземпляр класса для их ф-ала создавать не обязательно
     # TODO Методы при каждом вызове меняют seq_pair глобально
-
-    @classmethod
-    def m0_perturb(cls, seq_pair):
-        random.shuffle(seq_pair.X)
-        random.shuffle(seq_pair.Y)
-        return seq_pair
 
     @classmethod
     def m1_perturb(cls, seq_pair):
@@ -184,9 +172,8 @@ class SimAnnealing:
     @classmethod
     def get_cost(cls, seq_pair):
         total_wire_length = 0
-        penalty = 0  # Если между блоками нет расстояния
-        start_points_x = seq_pair.find_true_SP_coordinates()[0]
-        start_points_y = seq_pair.find_true_SP_coordinates()[1]
+        start_points_x = seq_pair.find_SP_coordinates()[0]
+        start_points_y = seq_pair.find_SP_coordinates()[1]
 
         def get_central_point(k):
             f_x = start_points_x[k] + seq_pair.wid_hei_dict[k + 1][0] - 1
@@ -204,15 +191,7 @@ class SimAnnealing:
                 total_wire_length += abs(get_central_point(i).x - get_central_point(j).x) + \
                                      abs(get_central_point(i).y - get_central_point(j).y)
                 # TODO добавю вл. цикл. Протестить существенно ли влияние на время
-                # Вставить код сюда:
-
-                #
                 j += 1
-                # tmp_list.append(total_wire_length)
-            # print(
-            # get_central_point(i).x, get_central_point(i).y, ' Размеры фигуры: {}'.format(seq_pair.wid_hei_dict[i+1])
-            # )
-            # print(tmp_list)
 
         return total_wire_length
 
@@ -220,7 +199,7 @@ class SimAnnealing:
 
         statistics = Statistics(0, 0, 0)
         while self.temperature > self.frozen:
-            for _ in range(100):
+            for _ in range(1000):
                 prev_seq_pair = copy.deepcopy(seq_pair)
                 prev_cost = self.get_cost(prev_seq_pair)
 
@@ -254,10 +233,8 @@ class SimAnnealing:
 ### Rules ###
 (<...xi..xj... > , < ...xi..xj...>)) x[i] is left to x[j]
 (<...xj..xi... > , < ...xi..xj...>)) x[i] is below x[j]
-
 1) if bi is after bj in X and before bj in Y , then bi is before
 bj in XR and before bj in Y , and
-
 2) if bi is before bj in XR and before bj in Y , then bi is
 after bj in X and before bj in Y
 """
@@ -295,7 +272,7 @@ print(SimAnnealing.get_cost(init_seq_pair))
 # x_y_SP = init_seq_pair.find_SP_coordinates()
 
 annealed_seq_pair = SimAnnealing(40000, 3)
-x_y_SA = annealed_seq_pair.sim_annealing(init_seq_pair).find_true_SP_coordinates()
+x_y_SA = annealed_seq_pair.sim_annealing(init_seq_pair).find_SP_coordinates()
 print(x_y_SA)
 
 
