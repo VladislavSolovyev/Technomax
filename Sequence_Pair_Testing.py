@@ -21,7 +21,6 @@ class SeqPair:
         self.Y = Y
         self.wid_hei_dict = wid_hei_dict
         self.delta = delta
-        self.wid_hei_dict = self.modify_wid_hei_dict()
 
     def modify_wid_hei_dict(self):
         tmp_wid_hei_dict = dict()
@@ -70,14 +69,14 @@ class SeqPair:
         '''
         L = [0 for _ in range(len(self.X))]
 
-        # tmp_wid_hei_dict = self.modify_wid_hei_dict()
+        tmp_wid_hei_dict = self.modify_wid_hei_dict()
 
         # ALGORITHM for x coordinate:
         for i in range(len(self.X)):
             b = self.X[i]
             p = match.y[b]
             P[b - 1] = L[p]
-            tmp = P[b - 1] + self.wid_hei_dict[b][0]
+            tmp = P[b - 1] + tmp_wid_hei_dict[b][0]
             for j in range(p, len(self.X)):
                 if tmp > L[j]:
                     L[j] = tmp
@@ -102,7 +101,7 @@ class SeqPair:
             b = XR[i]
             p = match.y[b]
             P[b - 1] = L[p]
-            tmp = P[b - 1] + self.wid_hei_dict[b][1]
+            tmp = P[b - 1] + tmp_wid_hei_dict[b][1]
             for j in range(p, len(self.X)):
                 if tmp > L[j]:
                     L[j] = tmp
@@ -129,12 +128,6 @@ class SimAnnealing:
 
     # TODO Оказалось это должны быть методы класса, т.к. экземпляр класса для их ф-ала создавать не обязательно
     # TODO Методы при каждом вызове меняют seq_pair глобально
-
-    @classmethod
-    def m0_perturb(cls, seq_pair):
-        random.shuffle(seq_pair.X)
-        random.shuffle(seq_pair.Y)
-        return seq_pair
 
     @classmethod
     def m1_perturb(cls, seq_pair):
@@ -175,7 +168,6 @@ class SimAnnealing:
     @classmethod
     def get_cost(cls, seq_pair):
         total_wire_length = 0
-        penalty = 0  # Если между блоками нет расстояния
         start_points_x = seq_pair.find_SP_coordinates()[0]
         start_points_y = seq_pair.find_SP_coordinates()[1]
 
@@ -201,20 +193,20 @@ class SimAnnealing:
                 #
                 j += 1
 
-        return total_wire_length + penalty
+        return total_wire_length
 
     def sim_annealing(self, seq_pair):
-
+        new_seq_pair = seq_pair
         statistics = Statistics(0, 0, 0)
         while self.temperature > self.frozen:
             for _ in range(1000):
                 prev_seq_pair = copy.deepcopy(seq_pair)
                 prev_cost = self.get_cost(prev_seq_pair)
 
-                if random.random() < 0.0000010:
+                if random.random() < 0.90:
                     new_seq_pair = self.m3_perturb(seq_pair)
                     statistics.m3_count += 1
-                elif random.random() < 0.40:
+                elif random.random() < 0.000040:
                     new_seq_pair = self.m2_perturb(seq_pair)
                     statistics.m2_count += 1
                 else:
@@ -257,14 +249,14 @@ Y = [8, 4, 7, 2, 5, 3, 6, 1]
 
 # TODO Сделать нормальные ключи для словарей
 wid_hei_dict = {
-    1: [2, 4, 'АХПП'],
-    2: [1, 3, 'Печь'],
-    3: [3, 3, 'Печь_2'],
-    4: [3, 5, 'Кабина'],
-    5: [3, 2, 'Зона Загрузки'],
-    6: [5, 3, 'Зона Выгрузки'],
-    7: [1, 2, 'Курилка'],
-    8: [2, 4, 'Паркет'],
+    1: [2, 4, '1_АХПП'],
+    2: [1, 3, '2_Печь'],
+    3: [3, 3, '3_Печь_2'],
+    4: [3, 5, '4_Кабина'],
+    5: [3, 2, '5_Зона Загрузки'],
+    6: [5, 3, '6_Зона Выгрузки'],
+    7: [1, 2, '7_Курилка'],
+    8: [2, 4, '8_Паркет'],
 }
 
 area = Area()
@@ -277,14 +269,15 @@ print(SimAnnealing.get_cost(init_seq_pair))
 # m1_perturb глобально меняет seq_pair
 # new_p = SimAnnealing.m2_perturb(init_seq_pair)
 
-#x_SP_coordinates = init_seq_pair.find_SP_coordinates()[0]
-#y_SP_coordinates = init_seq_pair.find_SP_coordinates()[1]
+# x_SP_coordinates = init_seq_pair.find_SP_coordinates()[0]
+# y_SP_coordinates = init_seq_pair.find_SP_coordinates()[1]
 # x_y_SP = init_seq_pair.find_SP_coordinates()
 
 annealed_seq_pair = SimAnnealing(400000, 3)
 x_y_SA = annealed_seq_pair.sim_annealing(init_seq_pair).find_SP_coordinates()
+# x_y_SA = init_seq_pair.find_SP_coordinates()
 
-
+tmp_list = [[], [], []]
 # TODO провести серию экспериментов и найти такие параметры, при которых изменение cost'ов < 5%
 class Calculate:
     @staticmethod
@@ -297,10 +290,18 @@ class Calculate:
                     x_y_SA[1][i]
                 ),
                 Coordinate(
-                    x_y_SA[0][i] + wid_hei_dict[i + 1][0] - 1,
-                    x_y_SA[1][i] + wid_hei_dict[i + 1][1] - 1
-                )
+                    x_y_SA[0][i] + init_seq_pair.wid_hei_dict[i + 1][0] - 1,
+                    x_y_SA[1][i] + init_seq_pair.wid_hei_dict[i + 1][1] - 1
+                ),
+                init_seq_pair.wid_hei_dict[i + 1][2]
             )
-            figures.append(figure)
-        return figures
+            tmp_list[0].append((
+                        x_y_SA[0][i],
+                        x_y_SA[1][i]
+                    ))
+            tmp_list[2].append(init_seq_pair.wid_hei_dict[i + 1][2])
 
+            figures.append(figure)
+        print('Координаты стартовых точек= ', tmp_list)
+
+        return figures

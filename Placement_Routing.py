@@ -19,9 +19,10 @@ class Coordinate:
 
 
 class Figure:
-    def __init__(self, start_point, finish_point):
+    def __init__(self, start_point, finish_point, name):
         self.start_point = start_point
         self.finish_point = finish_point
+        self.name = name
         # self.fig_name = fig_name -- для создания именнованных фигур
         self.figures_queue = []
         # Поля для связи конвейера с фигурами
