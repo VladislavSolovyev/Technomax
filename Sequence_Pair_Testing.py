@@ -13,7 +13,6 @@ class Statistics:
     def get_statistics(self):
         print('m1: {}, m2: {}, m3: {}'.format(self.m1_count, self.m2_count, self.m3_count))
 
-# TODO Файлик для теста разных SP, протестированы с телеги и Вонговский
 
 class SeqPair:
 
@@ -22,6 +21,7 @@ class SeqPair:
         self.Y = Y
         self.wid_hei_dict = wid_hei_dict
         self.delta = delta
+        self.wid_hei_dict = self.modify_wid_hei_dict()
 
     def modify_wid_hei_dict(self):
         tmp_wid_hei_dict = dict()
@@ -70,14 +70,14 @@ class SeqPair:
         '''
         L = [0 for _ in range(len(self.X))]
 
-        tmp_wid_hei_dict = self.modify_wid_hei_dict()
+        # tmp_wid_hei_dict = self.modify_wid_hei_dict()
 
         # ALGORITHM for x coordinate:
         for i in range(len(self.X)):
             b = self.X[i]
             p = match.y[b]
             P[b - 1] = L[p]
-            tmp = P[b - 1] + tmp_wid_hei_dict[b][0]
+            tmp = P[b - 1] + self.wid_hei_dict[b][0]
             for j in range(p, len(self.X)):
                 if tmp > L[j]:
                     L[j] = tmp
@@ -102,7 +102,7 @@ class SeqPair:
             b = XR[i]
             p = match.y[b]
             P[b - 1] = L[p]
-            tmp = P[b - 1] + tmp_wid_hei_dict[b][1]
+            tmp = P[b - 1] + self.wid_hei_dict[b][1]
             for j in range(p, len(self.X)):
                 if tmp > L[j]:
                     L[j] = tmp
@@ -188,23 +188,10 @@ class SimAnnealing:
 
             return Coordinate(central_point_x, central_point_y)
 
-        def not_intersect_delta(i, j, delta):
-
-            f_x = start_points_x[i] + seq_pair.wid_hei_dict[i + 1][0] - 1
-            f_y = start_points_y[i] + seq_pair.wid_hei_dict[i + 1][1] - 1
-
-            f_sh_x = start_points_x[j] + seq_pair.wid_hei_dict[j + 1][0] - 1
-            f_sh_y = start_points_y[j] + seq_pair.wid_hei_dict[j + 1][1] - 1
-
-            return (f_sh_x < start_points_x[i] - delta) or (start_points_y[j] > f_y + delta) or \
-                   (start_points_x[j] > f_x + delta) or (f_sh_y < start_points_y[i] - delta)
-
-
         tmp_list = []
         for i in range(len(start_points_x)):
             j = i
-            #if not not_intersect_delta(i, j, 1):
-                #penalty += 100
+
             while j < len(start_points_x):
                 total_wire_length += abs(get_central_point(i).x - get_central_point(j).x) + \
                                      abs(get_central_point(i).y - get_central_point(j).y)
@@ -213,11 +200,6 @@ class SimAnnealing:
 
                 #
                 j += 1
-                # tmp_list.append(total_wire_length)
-            # print(
-            # get_central_point(i).x, get_central_point(i).y, ' Размеры фигуры: {}'.format(seq_pair.wid_hei_dict[i+1])
-            # )
-            # print(tmp_list)
 
         return total_wire_length + penalty
 
@@ -229,7 +211,7 @@ class SimAnnealing:
                 prev_seq_pair = copy.deepcopy(seq_pair)
                 prev_cost = self.get_cost(prev_seq_pair)
 
-                if random.random() < 0.10:
+                if random.random() < 0.0000010:
                     new_seq_pair = self.m3_perturb(seq_pair)
                     statistics.m3_count += 1
                 elif random.random() < 0.40:
@@ -289,7 +271,7 @@ area = Area()
 area.draw_map(50, 60)
 a = []
 
-init_seq_pair = SeqPair(X, Y, wid_hei_dict, delta=1)
+init_seq_pair = SeqPair(X, Y, wid_hei_dict, delta=2)
 print(SimAnnealing.get_cost(init_seq_pair))
 
 # m1_perturb глобально меняет seq_pair
@@ -321,3 +303,4 @@ class Calculate:
             )
             figures.append(figure)
         return figures
+
