@@ -22,6 +22,7 @@ class SeqPair:
         self.Y = Y
         self.wid_hei_dict = wid_hei_dict
         self.delta = delta
+        # self.wid_hei_dict = self.modify_wid_hei_dict()
 
     def modify_wid_hei_dict(self):
         tmp_wid_hei_dict = dict()
@@ -70,14 +71,14 @@ class SeqPair:
         '''
         L = [0 for _ in range(len(self.X))]
 
-        tmp_wid_hei_dict = self.modify_wid_hei_dict()
+        #tmp_wid_hei_dict = self.modify_wid_hei_dict()
 
         # ALGORITHM for x coordinate:
         for i in range(len(self.X)):
             b = self.X[i]
             p = match.y[b]
             P[b - 1] = L[p]
-            tmp = P[b - 1] + tmp_wid_hei_dict[b][0]
+            tmp = P[b - 1] + self.wid_hei_dict[b][0]
             for j in range(p, len(self.X)):
                 if tmp > L[j]:
                     L[j] = tmp
@@ -102,7 +103,7 @@ class SeqPair:
             b = XR[i]
             p = match.y[b]
             P[b - 1] = L[p]
-            tmp = P[b - 1] + tmp_wid_hei_dict[b][1]
+            tmp = P[b - 1] + self.wid_hei_dict[b][1]
             for j in range(p, len(self.X)):
                 if tmp > L[j]:
                     L[j] = tmp
@@ -112,13 +113,20 @@ class SeqPair:
         y_SP_coordinates = P
         #print(y_SP_coordinates)
 
-        for i in range(len(x_SP_coordinates)):
-            x_SP_coordinates[i] = x_SP_coordinates[i] + self.delta
-
-        for i in range(len(y_SP_coordinates)):
-            y_SP_coordinates[i] = y_SP_coordinates[i] + self.delta
-
+        # TODO Сделать обратный переход по дельте в конце выполнения
         return [x_SP_coordinates, y_SP_coordinates]
+
+    def find_true_SP_coordinates(self):
+        true_coordinates = [[], []]
+        for i in range(len(self.find_SP_coordinates()[0])):
+            self.find_SP_coordinates()[0][i] += self.delta
+            true_coordinates[0].append(self.find_SP_coordinates()[0][i])
+
+        for i in range(len(self.find_SP_coordinates()[1])):
+            self.find_SP_coordinates()[1][i] += self.delta
+            true_coordinates[1].append(self.find_SP_coordinates()[1][i])
+
+        return true_coordinates
 
 
 class SimAnnealing:
@@ -166,6 +174,7 @@ class SimAnnealing:
     @classmethod
     def m3_perturb(cls, seq_pair):
         rand_ind = random.randrange(1, len(seq_pair.X) + 1)
+
         seq_pair.wid_hei_dict[rand_ind][0], seq_pair.wid_hei_dict[rand_ind][1] = \
             seq_pair.wid_hei_dict[rand_ind][1], seq_pair.wid_hei_dict[rand_ind][0]
 
@@ -176,8 +185,8 @@ class SimAnnealing:
     def get_cost(cls, seq_pair):
         total_wire_length = 0
         penalty = 0  # Если между блоками нет расстояния
-        start_points_x = seq_pair.find_SP_coordinates()[0]
-        start_points_y = seq_pair.find_SP_coordinates()[1]
+        start_points_x = seq_pair.find_true_SP_coordinates()[0]
+        start_points_y = seq_pair.find_true_SP_coordinates()[1]
 
         def get_central_point(k):
             f_x = start_points_x[k] + seq_pair.wid_hei_dict[k + 1][0] - 1
@@ -188,23 +197,9 @@ class SimAnnealing:
 
             return Coordinate(central_point_x, central_point_y)
 
-        def not_intersect_delta(i, j, delta):
-
-            f_x = start_points_x[i] + seq_pair.wid_hei_dict[i + 1][0] - 1
-            f_y = start_points_y[i] + seq_pair.wid_hei_dict[i + 1][1] - 1
-
-            f_sh_x = start_points_x[j] + seq_pair.wid_hei_dict[j + 1][0] - 1
-            f_sh_y = start_points_y[j] + seq_pair.wid_hei_dict[j + 1][1] - 1
-
-            return (f_sh_x < start_points_x[i] - delta) or (start_points_y[j] > f_y + delta) or \
-                   (start_points_x[j] > f_x + delta) or (f_sh_y < start_points_y[i] - delta)
-
-
         tmp_list = []
         for i in range(len(start_points_x)):
             j = i
-            #if not not_intersect_delta(i, j, 1):
-                #penalty += 100
             while j < len(start_points_x):
                 total_wire_length += abs(get_central_point(i).x - get_central_point(j).x) + \
                                      abs(get_central_point(i).y - get_central_point(j).y)
@@ -219,17 +214,17 @@ class SimAnnealing:
             # )
             # print(tmp_list)
 
-        return total_wire_length + penalty
+        return total_wire_length
 
     def sim_annealing(self, seq_pair):
 
         statistics = Statistics(0, 0, 0)
         while self.temperature > self.frozen:
-            for _ in range(1000):
+            for _ in range(100):
                 prev_seq_pair = copy.deepcopy(seq_pair)
                 prev_cost = self.get_cost(prev_seq_pair)
 
-                if random.random() < 0.10:
+                if random.random() < 0.00000010:
                     new_seq_pair = self.m3_perturb(seq_pair)
                     statistics.m3_count += 1
                 elif random.random() < 0.40:
@@ -289,7 +284,7 @@ area = Area()
 area.draw_map(50, 60)
 a = []
 
-init_seq_pair = SeqPair(X, Y, wid_hei_dict, delta=1)
+init_seq_pair = SeqPair(X, Y, wid_hei_dict, delta=2)
 print(SimAnnealing.get_cost(init_seq_pair))
 
 # m1_perturb глобально меняет seq_pair
@@ -299,8 +294,9 @@ print(SimAnnealing.get_cost(init_seq_pair))
 #y_SP_coordinates = init_seq_pair.find_SP_coordinates()[1]
 # x_y_SP = init_seq_pair.find_SP_coordinates()
 
-annealed_seq_pair = SimAnnealing(400000, 3)
-x_y_SA = annealed_seq_pair.sim_annealing(init_seq_pair).find_SP_coordinates()
+annealed_seq_pair = SimAnnealing(40000, 3)
+x_y_SA = annealed_seq_pair.sim_annealing(init_seq_pair).find_true_SP_coordinates()
+print(x_y_SA)
 
 
 # TODO провести серию экспериментов и найти такие параметры, при которых изменение cost'ов < 5%
