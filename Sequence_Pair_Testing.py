@@ -5,13 +5,15 @@ import copy
 
 
 class Statistics:
-    def __init__(self, m1_count=0, m2_count=0, m3_count=0):
+    def __init__(self, m1_count=0, m2_count=0, m3_count=0, bad_variants=0):
         self.m1_count = m1_count
         self.m2_count = m2_count
         self.m3_count = m3_count
+        self.bad_variants = bad_variants
 
     def get_statistics(self):
         print('m1: {}, m2: {}, m3: {}'.format(self.m1_count, self.m2_count, self.m3_count))
+        print('Acception of bad variants: ', self.bad_variants)
 
 
 class SeqPair:
@@ -174,6 +176,27 @@ class SimAnnealing:
         start_points_x = tmp_points[0]
         start_points_y = tmp_points[1]
 
+        def get_total_area():
+            max_ind_x = 0
+            max_x = 0
+            for i in range(len(start_points_x)):
+                if start_points_x[i] > max_x:
+                    max_x = start_points_x[i]
+                    max_ind_x = i
+            max_height = max_x + seq_pair.wid_hei_dict[max_ind_x + 1][0] - 1
+
+            max_ind_y = 0
+            max_y = 0
+            for j in range(len(start_points_y)):
+                if start_points_y[j] > max_y:
+                    max_y = start_points_y[j]
+                    max_ind_y = j
+            max_width = max_y + seq_pair.wid_hei_dict[max_ind_y + 1][1] - 1
+
+            return max_width*max_height
+
+        total_area = get_total_area()
+
         def get_central_point(k):
             f_x = start_points_x[k] + seq_pair.wid_hei_dict[k + 1][0] - 1
             f_y = start_points_y[k] + seq_pair.wid_hei_dict[k + 1][1] - 1
@@ -186,17 +209,12 @@ class SimAnnealing:
         tmp_list = []
         for i in range(len(start_points_x)):
             j = i
-
             while j < len(start_points_x):
                 total_wire_length += abs(get_central_point(i).x - get_central_point(j).x) + \
                                      abs(get_central_point(i).y - get_central_point(j).y)
-                # TODO добавю вл. цикл. Протестить существенно ли влияние на время
-                # Вставить код сюда:
-
-                #
                 j += 1
 
-        return total_wire_length
+        return 0.3*total_area + total_wire_length
 
     def sim_annealing(self, seq_pair):
 
@@ -222,6 +240,7 @@ class SimAnnealing:
                     seq_pair = new_seq_pair
                 elif random.uniform(0, 1) > math.e ** (delta_cost / self.temperature):
                     seq_pair = new_seq_pair
+                    statistics.bad_variants += 1
                 else:
                     seq_pair = prev_seq_pair
 
@@ -277,7 +296,7 @@ print(SimAnnealing.get_cost(init_seq_pair))
 # y_SP_coordinates = init_seq_pair.find_SP_coordinates()[1]
 # x_y_SP = init_seq_pair.find_SP_coordinates()
 
-annealed_seq_pair = SimAnnealing(40000, 2)
+annealed_seq_pair = SimAnnealing(4000000, 2)
 final_SP = annealed_seq_pair.sim_annealing(init_seq_pair)
 x_y_SA = final_SP.find_SP_coordinates()
 # x_y_SA = init_seq_pair.find_SP_coordinates()
