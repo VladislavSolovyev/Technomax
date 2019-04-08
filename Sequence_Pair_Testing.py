@@ -29,6 +29,9 @@ class SeqPair:
         return tmp_wid_hei_dict
 
     def find_SP_coordinates(self):
+
+        tmp_wid_hei_dict = self.modify_wid_hei_dict()
+
         """
                  LCS of              LCS of
         block | (X1; Y1) | x_coor | (XR2 ; Y1) | y_coor
@@ -68,8 +71,6 @@ class SeqPair:
         longest common subsequence.
         '''
         L = [0 for _ in range(len(self.X))]
-
-        tmp_wid_hei_dict = self.modify_wid_hei_dict()
 
         # ALGORITHM for x coordinate:
         for i in range(len(self.X)):
@@ -158,6 +159,7 @@ class SimAnnealing:
 
     @classmethod
     def m3_perturb(cls, seq_pair):
+
         rand_ind = random.randrange(1, len(seq_pair.X) + 1)
         seq_pair.wid_hei_dict[rand_ind][0], seq_pair.wid_hei_dict[rand_ind][1] = \
             seq_pair.wid_hei_dict[rand_ind][1], seq_pair.wid_hei_dict[rand_ind][0]
@@ -168,8 +170,9 @@ class SimAnnealing:
     @classmethod
     def get_cost(cls, seq_pair):
         total_wire_length = 0
-        start_points_x = seq_pair.find_SP_coordinates()[0]
-        start_points_y = seq_pair.find_SP_coordinates()[1]
+        tmp_points = seq_pair.find_SP_coordinates()
+        start_points_x = tmp_points[0]
+        start_points_y = tmp_points[1]
 
         def get_central_point(k):
             f_x = start_points_x[k] + seq_pair.wid_hei_dict[k + 1][0] - 1
@@ -196,17 +199,17 @@ class SimAnnealing:
         return total_wire_length
 
     def sim_annealing(self, seq_pair):
-        new_seq_pair = seq_pair
+
         statistics = Statistics(0, 0, 0)
         while self.temperature > self.frozen:
-            for _ in range(10):
+            for _ in range(10000):
                 prev_seq_pair = copy.deepcopy(seq_pair)
                 prev_cost = self.get_cost(prev_seq_pair)
 
-                if random.random() < 0.99999999:
+                if random.random() < 0.1:
                     new_seq_pair = self.m3_perturb(seq_pair)
-                    # statistics.m3_count += 1
-                elif random.random() < 0.40:
+                    statistics.m3_count += 1
+                elif random.random() < 0.4:
                     new_seq_pair = self.m2_perturb(seq_pair)
                     statistics.m2_count += 1
                 else:
@@ -215,14 +218,13 @@ class SimAnnealing:
 
                 delta_cost = self.get_cost(new_seq_pair) - prev_cost
                 # TODO глобально меняет seq_pair, поэтому все PERTURB аксептятся
-                if delta_cost < 0:
+                if delta_cost <= 0:
                     seq_pair = new_seq_pair
-                    statistics.m3_count += 1
                 elif random.uniform(0, 1) > math.e ** (delta_cost / self.temperature):
                     seq_pair = new_seq_pair
-                    statistics.m3_count += 1
                 else:
                     seq_pair = prev_seq_pair
+
             self.temperature = float('{:.{}f}'.format(self.temperature, 100000)) * 0.5
 
         print(self.get_cost(seq_pair))
@@ -275,16 +277,18 @@ print(SimAnnealing.get_cost(init_seq_pair))
 # y_SP_coordinates = init_seq_pair.find_SP_coordinates()[1]
 # x_y_SP = init_seq_pair.find_SP_coordinates()
 
-annealed_seq_pair = SimAnnealing(40, 3)
-# x_y_SA = annealed_seq_pair.sim_annealing(init_seq_pair).find_SP_coordinates()
-x_y_SA = init_seq_pair.find_SP_coordinates()
+annealed_seq_pair = SimAnnealing(40000, 2)
+final_SP = annealed_seq_pair.sim_annealing(init_seq_pair)
+x_y_SA = final_SP.find_SP_coordinates()
+# x_y_SA = init_seq_pair.find_SP_coordinates()
 
+'''
 x_y_SA = annealed_seq_pair.m3_perturb(init_seq_pair).find_SP_coordinates()
 x_y_SA = annealed_seq_pair.m3_perturb(init_seq_pair).find_SP_coordinates()
 x_y_SA = annealed_seq_pair.m3_perturb(init_seq_pair).find_SP_coordinates()
 x_y_SA = annealed_seq_pair.m3_perturb(init_seq_pair).find_SP_coordinates()
 x_y_SA = annealed_seq_pair.m3_perturb(init_seq_pair).find_SP_coordinates()
-
+'''
 
 tmp_list = [[], [], []]
 # TODO провести серию экспериментов и найти такие параметры, при которых изменение cost'ов < 5%
@@ -292,23 +296,23 @@ class Calculate:
     @staticmethod
     def figures_SP():
         figures = []
-        for i in range(len(init_seq_pair.X)):
+        for i in range(len(final_SP.X)):
             figure = Figure(
                 Coordinate(
                     x_y_SA[0][i],
                     x_y_SA[1][i]
                 ),
                 Coordinate(
-                    x_y_SA[0][i] + init_seq_pair.wid_hei_dict[i + 1][0] - 1,
-                    x_y_SA[1][i] + init_seq_pair.wid_hei_dict[i + 1][1] - 1
+                    x_y_SA[0][i] + final_SP.wid_hei_dict[i + 1][0] - 1,
+                    x_y_SA[1][i] + final_SP.wid_hei_dict[i + 1][1] - 1
                 ),
-                init_seq_pair.wid_hei_dict[i + 1][2]
+                final_SP.wid_hei_dict[i + 1][2]
             )
             tmp_list[0].append((
                         x_y_SA[0][i],
                         x_y_SA[1][i]
                     ))
-            tmp_list[2].append(init_seq_pair.wid_hei_dict[i + 1][2])
+            tmp_list[2].append(final_SP.wid_hei_dict[i + 1][2])
 
             figures.append(figure)
         print('Координаты стартовых точек= ', tmp_list)
