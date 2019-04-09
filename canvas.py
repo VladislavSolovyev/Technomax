@@ -8,7 +8,7 @@ class Draw():
         root = Tk()
         width_canvas = max([f.finish_point.y for f in figures]) + 1
         height_canvas = max([f.finish_point.x for f in figures]) + 1
-        koef = 30
+        koef = 25
         c = Canvas(root, width=width_canvas*koef, height=height_canvas*koef, bg='white')
         c.pack()
 

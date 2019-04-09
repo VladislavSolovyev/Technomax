@@ -168,7 +168,7 @@ class Area:
         self.width = len(self.passabilities[0])  # Длина списка (количество столбцов)
         self.height = len(self.passabilities)  # Количество строчек на карте
 
-    def draw_map(self, height, width):
+    def draw_map(self, width, height):
         self.passabilities = [[0 for j in range(width)] for i in range(height)]  # Заполнение нулями матрицы-карты
         self.height = height
         self.width = width
@@ -214,8 +214,11 @@ from Technomax.canvas import *
 
 
 def _main():
+    from Technomax import Brandford_1
     area = Area()
-    area.draw_map(25, 40)
+    # area.draw_map(25, 40)
+    ar = Brandford_1.get_area()
+    area.draw_map(ar[0], ar[1])
 
     from Technomax.Sequence_Pair_Testing import Calculate
     figures = Calculate.figures_SP()
@@ -243,8 +246,6 @@ def _main():
     #a = area.figure_adding(figures[7])
     for i in range(1, len(figures)):
         a = area.figure_adding(figures[i])
-
-
 
     #a = area.conveyor_adding(Coordinate(4, 1), Coordinate(9, 5))
 

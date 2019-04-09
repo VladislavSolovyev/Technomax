@@ -5,14 +5,18 @@ import copy
 
 
 class Statistics:
-    def __init__(self, m1_count=0, m2_count=0, m3_count=0, bad_variants=0):
+    def __init__(self, m1_count=0, m2_count=0, m3_count=0, bad_variants=0, good_variants=0, AHPP_m3 = 0):
         self.m1_count = m1_count
         self.m2_count = m2_count
         self.m3_count = m3_count
         self.bad_variants = bad_variants
+        self.good_variants = good_variants
+        self.AHPP_m3 = AHPP_m3
+
 
     def get_statistics(self):
         print('m1: {}, m2: {}, m3: {}'.format(self.m1_count, self.m2_count, self.m3_count))
+        print('Acception of good variants: ', self.good_variants)
         print('Acception of bad variants: ', self.bad_variants)
 
 
@@ -161,7 +165,6 @@ class SimAnnealing:
 
     @classmethod
     def m3_perturb(cls, seq_pair):
-
         rand_ind = random.randrange(1, len(seq_pair.X) + 1)
         seq_pair.wid_hei_dict[rand_ind][0], seq_pair.wid_hei_dict[rand_ind][1] = \
             seq_pair.wid_hei_dict[rand_ind][1], seq_pair.wid_hei_dict[rand_ind][0]
@@ -181,18 +184,18 @@ class SimAnnealing:
             max_x = 0
             for i in range(len(start_points_x)):
                 if start_points_x[i] > max_x:
-                    max_x = start_points_x[i]
-                    max_ind_x = i
-            max_height = max_x + seq_pair.wid_hei_dict[max_ind_x + 1][0] - 1
+                    max_x = start_points_x[i] + seq_pair.wid_hei_dict[i + 1][0] - 1
+                    # max_ind_x = i
+            max_height = max_x # + seq_pair.wid_hei_dict[max_ind_x + 1][0] - 1
 
             max_ind_y = 0
             max_y = 0
             for j in range(len(start_points_y)):
                 if start_points_y[j] > max_y:
-                    max_y = start_points_y[j]
-                    max_ind_y = j
-            max_width = max_y + seq_pair.wid_hei_dict[max_ind_y + 1][1] - 1
-
+                    max_y = start_points_y[j] + seq_pair.wid_hei_dict[j + 1][1] - 1
+                   # max_ind_y = j + seq_pair.wid_hei_dict[max_ind_y + 1][1] - 1
+            max_width = max_y #+ seq_pair.wid_hei_dict[max_ind_y + 1][1] - 1
+            #print(max_width * max_height)
             return max_width*max_height
 
         total_area = get_total_area()
@@ -206,7 +209,6 @@ class SimAnnealing:
 
             return Coordinate(central_point_x, central_point_y)
 
-        tmp_list = []
         for i in range(len(start_points_x)):
             j = i
             while j < len(start_points_x):
@@ -214,19 +216,20 @@ class SimAnnealing:
                                      abs(get_central_point(i).y - get_central_point(j).y)
                 j += 1
 
-        return 0.3*total_area + total_wire_length
+        return total_wire_length #+ total_area +
 
     def sim_annealing(self, seq_pair):
-
-        statistics = Statistics(0, 0, 0)
+        statistics = Statistics(0, 0, 0, 0)
         while self.temperature > self.frozen:
-            for _ in range(10000):
+            for _ in range(1000):
                 prev_seq_pair = copy.deepcopy(seq_pair)
                 prev_cost = self.get_cost(prev_seq_pair)
 
+                # TODO сделать Тимберфульфа: P(m1)=4/5, P(m2)=1/5. If m1 rejected => m3 with P(1/10)
                 if random.random() < 0.1:
                     new_seq_pair = self.m3_perturb(seq_pair)
                     statistics.m3_count += 1
+
                 elif random.random() < 0.4:
                     new_seq_pair = self.m2_perturb(seq_pair)
                     statistics.m2_count += 1
@@ -235,16 +238,22 @@ class SimAnnealing:
                     statistics.m1_count += 1
 
                 delta_cost = self.get_cost(new_seq_pair) - prev_cost
+                # print(delta_cost)
                 # TODO глобально меняет seq_pair, поэтому все PERTURB аксептятся
-                if delta_cost <= 0:
-                    seq_pair = new_seq_pair
-                elif random.uniform(0, 1) > math.e ** (delta_cost / self.temperature):
-                    seq_pair = new_seq_pair
+                if delta_cost > 0:
+                    seq_pair = prev_seq_pair
+                    # if new_seq_pair.wid_hei_dict[1][1] == 1:
+                       # print('AHPP perturbation')
+                    statistics.good_variants += 1
+                    #print('ZAL.: ', math.e ** (delta_cost / self.temperature))
+                elif random.uniform(0, 1) > math.e ** ((delta_cost / self.temperature)*100000):
+                    #print('ZAL.: ',math.e ** (delta_cost / self.temperature))
+                    seq_pair = prev_seq_pair
                     statistics.bad_variants += 1
                 else:
-                    seq_pair = prev_seq_pair
+                    seq_pair = new_seq_pair
 
-            self.temperature = float('{:.{}f}'.format(self.temperature, 100000)) * 0.5
+            self.temperature = float('{:.{}f}'.format(self.temperature, 100000)) * 0.9
 
         print(self.get_cost(seq_pair))
         statistics.get_statistics()
@@ -271,7 +280,7 @@ Y = [8, 4, 7, 2, 5, 3, 6, 1]
 
 
 # TODO Сделать нормальные ключи для словарей
-wid_hei_dict = {
+'''wid_hei_dict = {
     1: [2, 4, '1_АХПП'],
     2: [1, 3, '2_Печь'],
     3: [3, 3, '3_Печь_2'],
@@ -281,10 +290,10 @@ wid_hei_dict = {
     7: [1, 2, '7_Курилка'],
     8: [2, 4, '8_Паркет'],
 }
+'''
+from Technomax import Brandford_1
+wid_hei_dict = Brandford_1.wid_hei_dict
 
-area = Area()
-area.draw_map(50, 60)
-a = []
 
 init_seq_pair = SeqPair(X, Y, wid_hei_dict, delta=2)
 print(SimAnnealing.get_cost(init_seq_pair))
@@ -299,7 +308,8 @@ print(SimAnnealing.get_cost(init_seq_pair))
 annealed_seq_pair = SimAnnealing(4000000, 2)
 final_SP = annealed_seq_pair.sim_annealing(init_seq_pair)
 x_y_SA = final_SP.find_SP_coordinates()
-# x_y_SA = init_seq_pair.find_SP_coordinates()
+
+#x_y_SA = init_seq_pair.find_SP_coordinates()
 
 '''
 x_y_SA = annealed_seq_pair.m3_perturb(init_seq_pair).find_SP_coordinates()
