@@ -246,7 +246,7 @@ class SimAnnealing:
                        # print('AHPP perturbation')
                     statistics.good_variants += 1
                     #print('ZAL.: ', math.e ** (delta_cost / self.temperature))
-                elif random.uniform(0, 1) > math.e ** ((delta_cost / self.temperature)*100000):
+                elif random.uniform(0, 1) > math.e ** ((delta_cost / self.temperature)*100):
                     #print('ZAL.: ',math.e ** (delta_cost / self.temperature))
                     seq_pair = prev_seq_pair
                     statistics.bad_variants += 1
@@ -305,7 +305,7 @@ print(SimAnnealing.get_cost(init_seq_pair))
 # y_SP_coordinates = init_seq_pair.find_SP_coordinates()[1]
 # x_y_SP = init_seq_pair.find_SP_coordinates()
 
-annealed_seq_pair = SimAnnealing(4000000, 2)
+annealed_seq_pair = SimAnnealing(40000, 2)
 final_SP = annealed_seq_pair.sim_annealing(init_seq_pair)
 x_y_SA = final_SP.find_SP_coordinates()
 
