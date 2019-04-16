@@ -253,7 +253,7 @@ class SimAnnealing:
                 else:
                     seq_pair = new_seq_pair
 
-            self.temperature = float('{:.{}f}'.format(self.temperature, 100000)) * 0.9
+            self.temperature = float('{:.{}f}'.format(self.temperature, 100000)) * 0.5
 
         print(self.get_cost(seq_pair))
         statistics.get_statistics()
@@ -310,7 +310,7 @@ final_SP = annealed_seq_pair.sim_annealing(init_seq_pair)
 x_y_SA = final_SP.find_SP_coordinates()
 
 #x_y_SA = init_seq_pair.find_SP_coordinates()
-
+#final_SP = init_seq_pair
 '''
 x_y_SA = annealed_seq_pair.m3_perturb(init_seq_pair).find_SP_coordinates()
 x_y_SA = annealed_seq_pair.m3_perturb(init_seq_pair).find_SP_coordinates()
@@ -337,6 +337,7 @@ class Calculate:
                 ),
                 final_SP.wid_hei_dict[i + 1][2]
             )
+
             tmp_list[0].append((
                         x_y_SA[0][i],
                         x_y_SA[1][i]

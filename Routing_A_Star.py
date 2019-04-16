@@ -36,8 +36,10 @@ class Routing:
                 return None
             if coordinate.y < 0 or area.width <= coordinate.y:
                 return None
-            if area.get_passability(coordinate) == -1:  # Если координата -- стена
+            if area.get_passability(coordinate) == -1: #or -2:  # Если координата -- стена
                 return None
+            #if area.get_passability(coordinate) == -2: #or -2:  # Если координата -- другой конвейер
+                #return None
 
             return Routing.Node(self, coordinate)  # Тут важный момент: потомок - это родитель и ????
 
@@ -90,6 +92,6 @@ class Routing:
                     open_set.remove(child_from_open_set)
 
                 open_set.append(child)
-
+                # print(open_set)
         return []
 

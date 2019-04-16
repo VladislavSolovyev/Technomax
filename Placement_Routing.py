@@ -13,7 +13,7 @@ class Coordinate:
         return self.x == other.x and self.y == other.y
 
     def __str__(self):
-        return 'x: {}, y: {}'.format(self.x, self.y)
+        return '(x:{}, y:{})'.format(self.x, self.y)
 
     def get_length(self, other):  # Манхетоновское расстояние
         return abs(self.x - other.x) + abs(self.y - other.y)
@@ -103,12 +103,18 @@ class Area:
 
     def conveyor_adding(self, coordinate_from, coordinate_to):
         path = Routing.get_path(self, coordinate_from, coordinate_to)
-        print(len(path))
+        print("Length of path =", len(path))
+        print("Path coordinates:")
+        for i in range(len(path)):
+            print(path[i], end=' ')
 
         # Добавление происходит поэлементной проходкой по Area
-        for _ in range(len(path)):
-            buf = path.pop()
-            self.passabilities[buf.x][buf.y] = -2
+        if path:
+            for _ in range(len(path)):
+                buf = path.pop()
+                self.passabilities[buf.x][buf.y] = -2
+        else:
+            print('Path does not exist')
         # print(list_of_walls)
         return self.passabilities
 
@@ -125,7 +131,7 @@ from Technomax.canvas import *
 def _main():
     from Technomax import Brandford_1
     area = Area()
-    # area.draw_map(25, 40)
+    #area.draw_map(25, 40)
     ar = Brandford_1.get_area()
     area.draw_map(ar[0], ar[1])
 
@@ -157,7 +163,8 @@ def _main():
     for i in range(len(figures)):
         a = area.figure_adding(figures[i])
 
-    a = area.conveyor_adding(Coordinate(4, 1), Coordinate(21, 21))
+    area.conveyor_adding(Coordinate(1, 1), Coordinate(1, 14))
+    #a = area.conveyor_adding(Coordinate(12, 13), Coordinate(12, 20))
 
 
     #a = area.conveyor_adding(Coordinate(4, 1), Coordinate(9, 5))
@@ -197,9 +204,9 @@ def _main():
                     # print(' {}'.format(a[i][j]), end=' ')
             f.write('\n')
 
+    print(end='\n')
     print(os.path.dirname(storage_path))
-    Draw.figs(figures)
-    print(6)
+    Draw.window(ar, figures, a)
 
 
 if __name__ == "__main__":

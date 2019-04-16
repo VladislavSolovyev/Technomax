@@ -25,7 +25,7 @@ height7 = 1000//gr + 1
 width8 = 1000//gr + 1
 height8 = 1000//gr + 1
 
-area = (700000//gr, 70000//gr)
+area = (700000//gr, 500000//gr)
 
 wid_hei_dict = {
     1: [height1, width1, '1_АХПП'],
