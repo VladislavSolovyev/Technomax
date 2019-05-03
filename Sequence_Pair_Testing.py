@@ -345,6 +345,6 @@ class Calculate:
             tmp_list[2].append(final_SP.wid_hei_dict[i + 1][2])
 
             figures.append(figure)
-        print('Координаты стартовых точек= ', tmp_list)
+        print('Координаты стартовых точек =', tmp_list)
 
         return figures

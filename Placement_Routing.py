@@ -24,7 +24,6 @@ class Figure:
         self.start_point = start_point
         self.finish_point = finish_point
         self.name = name
-        # self.fig_name = fig_name -- для создания именнованных фигур
         self.figures_queue = []
         # Поля для связи конвейера с фигурами
         # TODO пока в ручном режиме задую I/O агрегатов, в placement pins заранее известны
@@ -62,9 +61,6 @@ class Figure:
 
         return sorted(self.figures_queue, reverse=True)
 
-    def get_coordinates(self):
-        print(self.start_point)
-
 
 class Area:
     def __init__(self):
@@ -73,11 +69,11 @@ class Area:
             [1,  1,  1],
             [1,  1,  1],
         ]
-        self.width = len(self.passabilities[0])  # Длина списка (количество столбцов)
-        self.height = len(self.passabilities)  # Количество строчек на карте
+        #self.width = len(self.passabilities[0])  # Длина списка (количество столбцов)
+        #self.height = len(self.passabilities)  # Количество строчек на карте
 
     def draw_map(self, width, height):
-        self.passabilities = [[0 for j in range(width)] for i in range(height)]  # Заполнение нулями матрицы-карты
+        self.passabilities = [[1 for j in range(width)] for i in range(height)]  # Заполнение нулями матрицы-карты
         self.height = height
         self.width = width
         return self.passabilities
@@ -98,15 +94,13 @@ class Area:
 
         return self.passabilities
 
-    # TODO Пока принимает начальную и конечную точку. Походу ругается на Routing.get_path, т.к. /
-    # TODO это статический метод другого класса
-
     def conveyor_adding(self, coordinate_from, coordinate_to):
         path = Routing.get_path(self, coordinate_from, coordinate_to)
         print("Length of path =", len(path))
         print("Path coordinates:")
         for i in range(len(path)):
             print(path[i], end=' ')
+
 
         # Добавление происходит поэлементной проходкой по Area
         if path:
@@ -115,6 +109,8 @@ class Area:
                 self.passabilities[buf.x][buf.y] = -2
         else:
             print('Path does not exist')
+
+
         # print(list_of_walls)
         return self.passabilities
 
@@ -163,9 +159,12 @@ def _main():
     for i in range(len(figures)):
         a = area.figure_adding(figures[i])
 
-    area.conveyor_adding(Coordinate(1, 1), Coordinate(1, 14))
-    #a = area.conveyor_adding(Coordinate(12, 13), Coordinate(12, 20))
+    #a = area.conveyor_adding(Coordinate(2, 3), Coordinate(14, 9))
 
+    # TODO сделать костыль в виде проверки координаты to и from. Циклит при не той координате to
+    a = area.conveyor_adding(Coordinate(27, 2), Coordinate(1, 2))
+    a = area.conveyor_adding(Coordinate(0, 8), Coordinate(7, 8))
+    #a = area.conveyor_adding(Coordinate(0, 3), Coordinate(17, 28))
 
     #a = area.conveyor_adding(Coordinate(4, 1), Coordinate(9, 5))
 
