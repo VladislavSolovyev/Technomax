@@ -1,6 +1,21 @@
 from Technomax.Placement_Routing import *
 
 
+class Coordinate:
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+
+    def __eq__(self, other):
+        return self.x == other.x and self.y == other.y
+
+    def __str__(self):
+        return '(x:{}, y:{})'.format(self.x, self.y)
+
+    def get_length(self, other):  # Манхетоновское расстояние
+        return abs(self.x - other.x) + abs(self.y - other.y)
+
+
 class Routing:
     class Node:
         def __init__(self, parent, coordinate):  # У узла 2 параметра: имя родителя и координата родителя
@@ -71,17 +86,17 @@ class Routing:
         while open_set:
             open_set.sort(key=lambda node: node.f)         # Сортируем от мен. к бол. по полю "оцен. ф-ия"
             best_node = open_set[0]                        # Первый(самый дешевый) и будет лучшим
-            print('open_set[0].g =', open_set[0].g)
+            #print('open_set[0].g =', open_set[0].g)
 
             if best_node.coordinate == coordinate_to:      # Если лучшая оказалась терминальной, то возвр. путь
-                print('stroka 67')
+                # print('stroka 67')
                 path = []
                 node = best_node
-                #print('node.coordinate =', node.coordinate)
+                # print('node.coordinate =', node.coordinate)
                 while node:
                     path.insert(0, node.coordinate)        # Восстанавливаем путь из лучшей ноды
                     node = node.parent
-                    print('while node')
+                    # print('while node')
                 return path
             open_set.remove(best_node)
             # print('len of openset =',len(open_set))

@@ -1,22 +1,7 @@
 import pprint
 import tempfile
 import os
-from Technomax.Routing_A_Star import *
-
-
-class Coordinate:
-    def __init__(self, x, y):
-        self.x = x
-        self.y = y
-
-    def __eq__(self, other):
-        return self.x == other.x and self.y == other.y
-
-    def __str__(self):
-        return '(x:{}, y:{})'.format(self.x, self.y)
-
-    def get_length(self, other):  # Манхетоновское расстояние
-        return abs(self.x - other.x) + abs(self.y - other.y)
+from Technomax.Routing_A_Star import Routing, Coordinate
 
 
 class Figure:
@@ -94,14 +79,14 @@ class Area:
 
         return self.passabilities
 
-    def conveyor_adding(self, coordinate_from, coordinate_to):
+    def conveyor_adding(self, coordinate_from, coordinate_to, only_path_len=None):
         path = Routing.get_path(self, coordinate_from, coordinate_to)
+        if only_path_len:
+            return len(path)
         print("Length of path =", len(path))
         print("Path coordinates:")
         for i in range(len(path)):
             print(path[i], end=' ')
-
-
         # Добавление происходит поэлементной проходкой по Area
         if path:
             for _ in range(len(path)):
@@ -109,7 +94,6 @@ class Area:
                 self.passabilities[buf.x][buf.y] = -2
         else:
             print('Path does not exist')
-
 
         # print(list_of_walls)
         return self.passabilities
@@ -121,6 +105,7 @@ def coordinates_checker(start_point, finish_point):
     return False
 
 
+'''
 from Technomax.canvas import *
 
 
@@ -134,7 +119,7 @@ def _main():
     from Technomax.Sequence_Pair_Testing import Calculate
     figures = Calculate.figures_SP()
 
-    '''
+    
     # Запускаем фигуры на площадку
     with open('input.txt', 'r') as f:
         # TODO добавляю фигуры меня значение range()
@@ -147,7 +132,7 @@ def _main():
                 a = area.figure_adding(figure)
             else:
                 print('Finish point cannot be upper than start point')
-    '''
+    
 
 
     #a = area.figure_adding(figures[1])
@@ -169,7 +154,7 @@ def _main():
     #a = area.conveyor_adding(Coordinate(4, 1), Coordinate(9, 5))
 
     # Запускаем конвейер. Количество конвейеров в функции range
-    '''for _ in range(0):
+    for _ in range(0):
         coord = list(map(int, f.readline().split()))
         if coordinates_checker(Coordinate(coord[0], coord[1]), Coordinate(coord[2], coord[3])):
             figure = Figure(Coordinate(coord[0], coord[1]), Coordinate(coord[2], coord[3]))
@@ -177,7 +162,7 @@ def _main():
             a = area.conveyor_adding(Coordinate(4, 1), Coordinate(21, 21))
         else:
             print('Finish point cannot be upper than start point')
-    '''
+    
     storage_path = os.path.join(tempfile.gettempdir(), 'map.txt')
 
     # TODO Reverse is needed to allocate global in left bottom corner because of Sequence Pair
@@ -210,3 +195,4 @@ def _main():
 
 if __name__ == "__main__":
     _main()
+'''

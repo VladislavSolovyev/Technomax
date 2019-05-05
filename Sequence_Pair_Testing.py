@@ -1,4 +1,6 @@
-from Technomax.Placement_Routing import Figure, Coordinate, Area
+from Technomax.Placement_Routing import *
+from Technomax import Brandford_1
+from Technomax.canvas import Draw
 import random
 import math
 import copy
@@ -12,7 +14,6 @@ class Statistics:
         self.bad_variants = bad_variants
         self.good_variants = good_variants
         self.AHPP_m3 = AHPP_m3
-
 
     def get_statistics(self):
         print('m1: {}, m2: {}, m3: {}'.format(self.m1_count, self.m2_count, self.m3_count))
@@ -41,7 +42,6 @@ class SeqPair:
         """
                  LCS of              LCS of
         block | (X1; Y1) | x_coor | (XR2 ; Y1) | y_coor
-
         """
         '''Block position array P[b]; b = 1...n is used to record the x or
         y coordinate of block b depending on the weight w(b) equals
@@ -71,7 +71,6 @@ class SeqPair:
                     # в match попадают когда сошлись фигуры в одном списке и другом
                     match.x.update({self.X[i]: i})
                     match.y.update({self.Y[j]: j})
-
         '''
         The length array L[1...n] is used to record the length of candidates of the 
         longest common subsequence.
@@ -91,7 +90,6 @@ class SeqPair:
                     break
         x_SP_coordinates = P
         #print(x_SP_coordinates)
-
         # ALGORITHM for y coordinate:
         P = [0 for _ in range(len(self.X))]
         match = ForMatching({}, {})
@@ -125,6 +123,38 @@ class SeqPair:
             y_SP_coordinates[i] = y_SP_coordinates[i] + self.delta
 
         return [x_SP_coordinates, y_SP_coordinates]
+
+
+class TransformSeqPair:
+
+    @staticmethod
+    def to_passabilities(seq_pair, area):
+        x_y_SP_coordinates = seq_pair.find_SP_coordinates()
+        figures = []
+        for i in range(len(seq_pair.X)):
+            figure = Figure(
+                Coordinate(
+                    x_y_SP_coordinates[0][i],
+                    x_y_SP_coordinates[1][i]
+                ),
+                Coordinate(
+                    x_y_SP_coordinates[0][i] + seq_pair.wid_hei_dict[i + 1][0] - 1,
+                    x_y_SP_coordinates[1][i] + seq_pair.wid_hei_dict[i + 1][1] - 1
+                ),
+                seq_pair.wid_hei_dict[i + 1][2]
+            )
+            figures.append(figure)
+        a = [[]]
+        for i in range(len(figures)):
+            a = area.figure_adding(figures[i])
+        # Conveyor adding
+        a = area.conveyor_adding(Coordinate(27, 2), Coordinate(1, 2))
+
+        #a = area.conveyor_adding(Coordinate(0, 8), Coordinate(7, 8))
+
+        print(area.conveyor_adding(Coordinate(0, 8), Coordinate(7, 8), only_path_len=True))
+
+        return a, figures
 
 
 class SimAnnealing:
@@ -174,49 +204,49 @@ class SimAnnealing:
     # Манхетонское расстояние между центрами фигур
     @classmethod
     def get_cost(cls, seq_pair):
-        total_wire_length = 0
+
         tmp_points = seq_pair.find_SP_coordinates()
         start_points_x = tmp_points[0]
         start_points_y = tmp_points[1]
 
         def get_total_area():
-            max_ind_x = 0
             max_x = 0
             for i in range(len(start_points_x)):
                 if start_points_x[i] > max_x:
                     max_x = start_points_x[i] + seq_pair.wid_hei_dict[i + 1][0] - 1
-                    # max_ind_x = i
-            max_height = max_x # + seq_pair.wid_hei_dict[max_ind_x + 1][0] - 1
-
-            max_ind_y = 0
+            max_height = max_x
             max_y = 0
             for j in range(len(start_points_y)):
                 if start_points_y[j] > max_y:
                     max_y = start_points_y[j] + seq_pair.wid_hei_dict[j + 1][1] - 1
-                   # max_ind_y = j + seq_pair.wid_hei_dict[max_ind_y + 1][1] - 1
-            max_width = max_y #+ seq_pair.wid_hei_dict[max_ind_y + 1][1] - 1
+            max_width = max_y
             #print(max_width * max_height)
             return max_width*max_height
 
+        def get_total_manhattan_length():
+            total_manhattan_length = 0
+
+            def get_central_point(k):
+                f_x = start_points_x[k] + seq_pair.wid_hei_dict[k + 1][0] - 1
+                f_y = start_points_y[k] + seq_pair.wid_hei_dict[k + 1][1] - 1
+
+                central_point_x = (f_x + start_points_x[k]) / 2
+                central_point_y = (f_y + start_points_y[k]) / 2
+
+                return Coordinate(central_point_x, central_point_y)
+
+            for i in range(len(start_points_x)):
+                j = i
+                while j < len(start_points_x):
+                    total_manhattan_length += abs(get_central_point(i).x - get_central_point(j).x) + \
+                                         abs(get_central_point(i).y - get_central_point(j).y)
+                    j += 1
+            return total_manhattan_length
+
         total_area = get_total_area()
+        total_manhattan_length = get_total_manhattan_length()
 
-        def get_central_point(k):
-            f_x = start_points_x[k] + seq_pair.wid_hei_dict[k + 1][0] - 1
-            f_y = start_points_y[k] + seq_pair.wid_hei_dict[k + 1][1] - 1
-
-            central_point_x = (f_x + start_points_x[k]) / 2
-            central_point_y = (f_y + start_points_y[k]) / 2
-
-            return Coordinate(central_point_x, central_point_y)
-
-        for i in range(len(start_points_x)):
-            j = i
-            while j < len(start_points_x):
-                total_wire_length += abs(get_central_point(i).x - get_central_point(j).x) + \
-                                     abs(get_central_point(i).y - get_central_point(j).y)
-                j += 1
-
-        return total_wire_length #+ total_area +
+        return total_manhattan_length + total_area
 
     def sim_annealing(self, seq_pair):
         statistics = Statistics(0, 0, 0, 0)
@@ -241,13 +271,15 @@ class SimAnnealing:
                 # print(delta_cost)
                 # TODO глобально меняет seq_pair, поэтому все PERTURB аксептятся
                 if delta_cost > 0:
+                    # откат
                     seq_pair = prev_seq_pair
-                    # if new_seq_pair.wid_hei_dict[1][1] == 1:
-                       # print('AHPP perturbation')
+                    #if new_seq_pair.wid_hei_dict[1][1] == 1:
+                       #print('AHPP perturbation')
                     statistics.good_variants += 1
                     #print('ZAL.: ', math.e ** (delta_cost / self.temperature))
                 elif random.uniform(0, 1) > math.e ** ((delta_cost / self.temperature)*100):
                     #print('ZAL.: ',math.e ** (delta_cost / self.temperature))
+                    # откат
                     seq_pair = prev_seq_pair
                     statistics.bad_variants += 1
                 else:
@@ -260,15 +292,12 @@ class SimAnnealing:
         return seq_pair
 
 
-
 """
 ### Rules ###
 (<...xi..xj... > , < ...xi..xj...>)) x[i] is left to x[j]
 (<...xj..xi... > , < ...xi..xj...>)) x[i] is below x[j]
-
 1) if bi is after bj in X and before bj in Y , then bi is before
 bj in XR and before bj in Y , and
-
 2) if bi is before bj in XR and before bj in Y , then bi is
 after bj in X and before bj in Y
 """
@@ -291,10 +320,8 @@ Y = [8, 4, 7, 2, 5, 3, 6, 1]
     8: [2, 4, '8_Паркет'],
 }
 '''
-from Technomax import Brandford_1
+
 wid_hei_dict = Brandford_1.wid_hei_dict
-
-
 init_seq_pair = SeqPair(X, Y, wid_hei_dict, delta=2)
 print(SimAnnealing.get_cost(init_seq_pair))
 
@@ -307,18 +334,25 @@ print(SimAnnealing.get_cost(init_seq_pair))
 
 annealed_seq_pair = SimAnnealing(40000, 2)
 final_SP = annealed_seq_pair.sim_annealing(init_seq_pair)
-x_y_SA = final_SP.find_SP_coordinates()
+#x_y_SA = final_SP.find_SP_coordinates()
 
 #x_y_SA = init_seq_pair.find_SP_coordinates()
 #final_SP = init_seq_pair
-'''
-x_y_SA = annealed_seq_pair.m3_perturb(init_seq_pair).find_SP_coordinates()
-x_y_SA = annealed_seq_pair.m3_perturb(init_seq_pair).find_SP_coordinates()
-x_y_SA = annealed_seq_pair.m3_perturb(init_seq_pair).find_SP_coordinates()
-x_y_SA = annealed_seq_pair.m3_perturb(init_seq_pair).find_SP_coordinates()
-x_y_SA = annealed_seq_pair.m3_perturb(init_seq_pair).find_SP_coordinates()
-'''
 
+area = Area()
+ar = Brandford_1.get_area()
+area.draw_map(ar[0], ar[1])
+
+a, figures = TransformSeqPair.to_passabilities(final_SP, area)
+Draw.window(ar, figures, a)
+'''
+x_y_SA = annealed_seq_pair.m3_perturb(init_seq_pair).find_SP_coordinates()
+x_y_SA = annealed_seq_pair.m3_perturb(init_seq_pair).find_SP_coordinates()
+x_y_SA = annealed_seq_pair.m3_perturb(init_seq_pair).find_SP_coordinates()
+x_y_SA = annealed_seq_pair.m3_perturb(init_seq_pair).find_SP_coordinates()
+x_y_SA = annealed_seq_pair.m3_perturb(init_seq_pair).find_SP_coordinates()
+'''
+'''
 tmp_list = [[], [], []]
 # TODO провести серию экспериментов и найти такие параметры, при которых изменение cost'ов < 5%
 class Calculate:
@@ -348,3 +382,4 @@ class Calculate:
         print('Координаты стартовых точек =', tmp_list)
 
         return figures
+    '''
