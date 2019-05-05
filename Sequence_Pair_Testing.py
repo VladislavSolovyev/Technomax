@@ -304,10 +304,6 @@ after bj in X and before bj in Y
 
 # seq_pair = [[1, 7, 4, 5, 2, 6, 3, 8], [8, 4, 7, 2, 5, 3, 6, 1]]
 
-X = [1, 7, 4, 5, 2, 6, 3, 8]
-Y = [8, 4, 7, 2, 5, 3, 6, 1]
-
-
 # TODO Сделать нормальные ключи для словарей
 '''wid_hei_dict = {
     1: [2, 4, '1_АХПП'],
@@ -321,7 +317,9 @@ Y = [8, 4, 7, 2, 5, 3, 6, 1]
 }
 '''
 
-wid_hei_dict = Brandford_1.wid_hei_dict
+wid_hei_dict = Brandford_1.get_wid_hei_dict()
+X, Y = Brandford_1.get_sequences()
+
 init_seq_pair = SeqPair(X, Y, wid_hei_dict, delta=2)
 print(SimAnnealing.get_cost(init_seq_pair))
 

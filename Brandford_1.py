@@ -38,6 +38,12 @@ wid_hei_dict = {
     8: [height8, width8, '8_Паркет'],
 }
 
+X = [1, 7, 4, 5, 2, 6, 3, 8]
+Y = [8, 4, 7, 2, 5, 3, 6, 1]
+
+def get_sequences():
+    return X, Y
+
 def get_area():
     return area
 
