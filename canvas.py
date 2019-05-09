@@ -16,7 +16,7 @@ class Draw():
         width_canvas = ar[0]
         height_canvas = ar[1]
 
-        koef = 25
+        koef = 20 # был 25
         c = Canvas(root, width=width_canvas*koef, height=height_canvas*koef, bg='white')
         c.pack()
 

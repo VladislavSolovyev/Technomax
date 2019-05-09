@@ -49,19 +49,21 @@ class Figure:
 
 
 class Area:
-    def __init__(self):
+    def __init__(self, width, height):
         self.passabilities = [
             [1,  1,  1],
             [1,  1,  1],
             [1,  1,  1],
         ]
-        #self.width = len(self.passabilities[0])  # Длина списка (количество столбцов)
-        #self.height = len(self.passabilities)  # Количество строчек на карте
-
-    def draw_map(self, width, height):
-        self.passabilities = [[1 for j in range(width)] for i in range(height)]  # Заполнение нулями матрицы-карты
-        self.height = height
         self.width = width
+        self.height = height
+
+    def draw_map(self):
+        self.passabilities = [[1 for j in range(self.width)] for i in range(self.height)]  # Заполнение нулями матрицы-карты
+        return self.passabilities
+
+    def clear_map(self):
+        self.passabilities = [[1 for j in range(self.width)] for i in range(self.height)]  # Заполнение нулями матрицы-карты
         return self.passabilities
 
     def get_passability(self, coordinate):
@@ -84,17 +86,17 @@ class Area:
         path = Routing.get_path(self, coordinate_from, coordinate_to)
         if only_path_len:
             return len(path)
-        print("Length of path =", len(path))
-        print("Path coordinates:")
-        for i in range(len(path)):
-            print(path[i], end=' ')
+        #print("Length of path =", len(path))
+        #print("Path coordinates:")
+        #for i in range(len(path)):
+            #print(path[i], end=' ')
         # Добавление происходит поэлементной проходкой по Area
         if path:
             for _ in range(len(path)):
                 buf = path.pop()
                 self.passabilities[buf.x][buf.y] = -2
-        else:
-            print('Path does not exist')
+        #else:
+            #print('Path does not exist')
 
         # print(list_of_walls)
         return self.passabilities
