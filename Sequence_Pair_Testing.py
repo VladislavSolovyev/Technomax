@@ -141,19 +141,29 @@ class TransformSeqPair:
                     x_y_SP_coordinates[0][i] + seq_pair.wid_hei_dict[i + 1][0] - 1,
                     x_y_SP_coordinates[1][i] + seq_pair.wid_hei_dict[i + 1][1] - 1
                 ),
-                seq_pair.wid_hei_dict[i + 1][2]
+                seq_pair.wid_hei_dict[i + 1][2],
+                seq_pair.wid_hei_dict[i + 1][3],
+                seq_pair.wid_hei_dict[i + 1][4],
+                seq_pair.wid_hei_dict[i + 1][5],
             )
             figures.append(figure)
+        print('len of figures:', len(figures))
         a = [[]]
         for i in range(len(figures)):
             a = area.figure_adding(figures[i])
+        for figure in figures:
+            tmp = figure.neighbor_name
+            coordinate_to = None
+            for now_figure in figures:
+                #print(now_figure.name)
+                #print(tmp)
+                if now_figure.name == tmp:
+                    coordinate_to = now_figure.out_point
+                else:
+                    pass
+            a = area.conveyor_adding(figure.in_point, coordinate_to)
         # Conveyor adding
-        a = area.conveyor_adding(Coordinate(27, 2), Coordinate(1, 2))
-
-        #a = area.conveyor_adding(Coordinate(0, 8), Coordinate(7, 8))
-
-        print(area.conveyor_adding(Coordinate(0, 8), Coordinate(7, 8), only_path_len=True))
-
+        #print(area.conveyor_adding(Coordinate(0, 8), Coordinate(7, 8), only_path_len=True))
         return a, figures
 
 
@@ -198,6 +208,10 @@ class SimAnnealing:
         rand_ind = random.randrange(1, len(seq_pair.X) + 1)
         seq_pair.wid_hei_dict[rand_ind][0], seq_pair.wid_hei_dict[rand_ind][1] = \
             seq_pair.wid_hei_dict[rand_ind][1], seq_pair.wid_hei_dict[rand_ind][0]
+        seq_pair.wid_hei_dict[rand_ind][3].x, seq_pair.wid_hei_dict[rand_ind][3].y = \
+            seq_pair.wid_hei_dict[rand_ind][3].y, seq_pair.wid_hei_dict[rand_ind][3].x
+        seq_pair.wid_hei_dict[rand_ind][4].x, seq_pair.wid_hei_dict[rand_ind][4].y = \
+            seq_pair.wid_hei_dict[rand_ind][4].y, seq_pair.wid_hei_dict[rand_ind][4].x
 
         return seq_pair
 
@@ -320,7 +334,7 @@ after bj in X and before bj in Y
 wid_hei_dict = Brandford_1.get_wid_hei_dict()
 X, Y = Brandford_1.get_sequences()
 
-init_seq_pair = SeqPair(X, Y, wid_hei_dict, delta=2)
+init_seq_pair = SeqPair(X, Y, wid_hei_dict, delta=5)
 print(SimAnnealing.get_cost(init_seq_pair))
 
 # m1_perturb глобально меняет seq_pair
@@ -343,41 +357,3 @@ area.draw_map(ar[0], ar[1])
 
 a, figures = TransformSeqPair.to_passabilities(final_SP, area)
 Draw.window(ar, figures, a)
-'''
-x_y_SA = annealed_seq_pair.m3_perturb(init_seq_pair).find_SP_coordinates()
-x_y_SA = annealed_seq_pair.m3_perturb(init_seq_pair).find_SP_coordinates()
-x_y_SA = annealed_seq_pair.m3_perturb(init_seq_pair).find_SP_coordinates()
-x_y_SA = annealed_seq_pair.m3_perturb(init_seq_pair).find_SP_coordinates()
-x_y_SA = annealed_seq_pair.m3_perturb(init_seq_pair).find_SP_coordinates()
-'''
-'''
-tmp_list = [[], [], []]
-# TODO провести серию экспериментов и найти такие параметры, при которых изменение cost'ов < 5%
-class Calculate:
-    @staticmethod
-    def figures_SP():
-        figures = []
-        for i in range(len(final_SP.X)):
-            figure = Figure(
-                Coordinate(
-                    x_y_SA[0][i],
-                    x_y_SA[1][i]
-                ),
-                Coordinate(
-                    x_y_SA[0][i] + final_SP.wid_hei_dict[i + 1][0] - 1,
-                    x_y_SA[1][i] + final_SP.wid_hei_dict[i + 1][1] - 1
-                ),
-                final_SP.wid_hei_dict[i + 1][2]
-            )
-
-            tmp_list[0].append((
-                        x_y_SA[0][i],
-                        x_y_SA[1][i]
-                    ))
-            tmp_list[2].append(final_SP.wid_hei_dict[i + 1][2])
-
-            figures.append(figure)
-        print('Координаты стартовых точек =', tmp_list)
-
-        return figures
-    '''
