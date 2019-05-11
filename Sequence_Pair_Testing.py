@@ -220,7 +220,7 @@ class SimAnnealing:
         '''
         '''
         seq_pair.wid_hei_dict[rand_ind][4].x, seq_pair.wid_hei_dict[rand_ind][4].y = \
-            seq_pair.wid_hei_dict[rand_ind][4].y, seq_pair.wid_hei_dict[rand_ind][4].x
+            seq_pair.wid_hei_dict[rand_ind][4].y - 2, seq_pair.wid_hei_dict[rand_ind][4].x + 2
         '''
         '''
         seq_pair.wid_hei_dict[rand_ind][3].x, seq_pair.wid_hei_dict[rand_ind][4].y = \
@@ -239,7 +239,7 @@ class SimAnnealing:
         tmp_points = seq_pair.find_SP_coordinates()
         start_points_x = tmp_points[0]
         start_points_y = tmp_points[1]
-        sum_length = TransformSeqPair.to_passabilities(seq_pair, area)[3]
+        #sum_length = TransformSeqPair.to_passabilities(seq_pair, area)[3]
 
         def get_total_area():
             max_x = 0
@@ -253,7 +253,7 @@ class SimAnnealing:
                     max_y = start_points_y[j] + seq_pair.wid_hei_dict[j + 1][1] - 1
             max_width = max_y
             #print(max_width * max_height)
-            return max_width*max_height
+            return max_width, max_height
 
         def get_total_manhattan_length():
             total_manhattan_length = 0
@@ -275,66 +275,107 @@ class SimAnnealing:
                     j += 1
             return total_manhattan_length
 
-        def get_total_conveyor_length():
-            return sum_length
+        #def get_total_conveyor_length():
+            #return sum_length
 
         total_area = get_total_area()
         total_manhattan_length = get_total_manhattan_length()
-        total_conveyor_length = get_total_conveyor_length()
+        #total_conveyor_length = get_total_conveyor_length()
 
-        return total_manhattan_length + total_area # + total_conveyor_length
+        return total_manhattan_length #[1]*total_area[0]# #+  +  total_area[0] * total_area[1] #+  # #+  # + total_conveyor_length
 
     def sim_annealing(self, seq_pair, area):
         statistics = Statistics(0, 0, 0, 0)
-        passabilities = None
+
         while self.temperature > self.frozen:
-            for _ in range(100):
+            for _ in range(1000):
                 prev_seq_pair = copy.deepcopy(seq_pair)
-                prev_passabilities = TransformSeqPair.to_passabilities(seq_pair, area)
                 prev_cost = self.get_cost(prev_seq_pair, area)
-
                 # TODO сделать Тимберфульфа: P(m1)=4/5, P(m2)=1/5. If m1 rejected => m3 with P(1/10)
-                if random.random() < 0.0000001:
-                    new_seq_pair = self.m3_perturb(seq_pair)
-                    new_passabilities = TransformSeqPair.to_passabilities(seq_pair, area)
-                    statistics.m3_count += 1
 
-                elif random.random() < 0.4:
+                random_unif = random.random()
+                if random_unif < 0.00001:
+                    new_seq_pair = self.m3_perturb(seq_pair)
+                    statistics.m3_count += 1
+                elif random_unif < 0.4:
                     new_seq_pair = self.m2_perturb(seq_pair)
-                    new_passabilities = TransformSeqPair.to_passabilities(seq_pair, area)
                     statistics.m2_count += 1
+
+                    delta_cost = self.get_cost(new_seq_pair, area) - prev_cost
+                    if delta_cost < 0:
+                        seq_pair = new_seq_pair
+                        # if seq_pair.wid_hei_dict[5][0] != 2:
+                        # print('Загрузка/выгрузка perturbation')
+                        statistics.good_variants += 1
+                    elif random.uniform(0.01, 1.0) < (math.e ** (-1 / (self.temperature / 8000000))) and delta_cost > 0:
+                        seq_pair = new_seq_pair
+                        statistics.bad_variants += 1
+                    else:
+                        seq_pair = prev_seq_pair
                 else:
                     new_seq_pair = self.m1_perturb(seq_pair)
-                    new_passabilities = TransformSeqPair.to_passabilities(seq_pair, area)
                     statistics.m1_count += 1
+                    delta_cost = self.get_cost(new_seq_pair, area) - prev_cost
+                    if delta_cost < 0:
+                        seq_pair = new_seq_pair
+                        # if seq_pair.wid_hei_dict[5][0] != 2:
+                        # print('Загрузка/выгрузка perturbation')
+                        statistics.good_variants += 1
+                    elif random.uniform(0.01, 1.0) < (math.e ** (-1 / (self.temperature / 4000000))) and delta_cost > 0:
+                        seq_pair = new_seq_pair
+                        statistics.bad_variants += 1
+                    else:
+                        if random.random() < 0.5:
+                            new_seq_pair = self.m3_perturb(seq_pair)
+                            statistics.m3_count += 1
+                            seq_pair = new_seq_pair
+                        else:
+                            seq_pair = prev_seq_pair
+            # SCHEDULE
+            if self.temperature > 100000:
+                self.temperature = float('{:.{}f}'.format(self.temperature, 100000)) * 0.8
+            elif self.temperature > 100:
+                self.temperature = float('{:.{}f}'.format(self.temperature, 100000)) * 0.95
+            else:
+                self.temperature = float('{:.{}f}'.format(self.temperature, 100000)) * 0.8
+        print('Cost after annealing:', self.get_cost(seq_pair, area))
+        statistics.get_statistics()
+        return seq_pair
 
+    '''
+    def sim_annealing_M3(self, seq_pair, area):
+        #passabilities = TransformSeqPair.to_passabilities(self.sim_annealing(seq_pair, area), area)
+        passabilities = TransformSeqPair.to_passabilities(seq_pair, area)
+        # M3
+        while self.temperature > self.frozen:
+            for _ in range(10):
+                prev_seq_pair = copy.deepcopy(seq_pair)
+                prev_cost = self.get_cost(prev_seq_pair, area)
+                new_seq_pair = seq_pair
+                prev_passabilities = TransformSeqPair.to_passabilities(seq_pair, area)
+                new_passabilities = prev_passabilities
+    
+                if random.random() < 0.5:
+                    new_seq_pair = self.m3_perturb(seq_pair)
+                    new_passabilities = TransformSeqPair.to_passabilities(seq_pair, area)
                 delta_cost = self.get_cost(new_seq_pair, area) - prev_cost
                 # print(delta_cost)
                 # TODO глобально меняет seq_pair, поэтому все PERTURB аксептятся
                 if delta_cost > 0:
-                    # откат
                     seq_pair = prev_seq_pair
                     passabilities = prev_passabilities
-                    #if new_seq_pair.wid_hei_dict[1][1] == 1:
-                       #print('AHPP perturbation')
-                    statistics.good_variants += 1
-                    #print('ZAL.: ', math.e ** (delta_cost / self.temperature))
-                elif random.uniform(0, 1) > math.e ** ((delta_cost / self.temperature)*100):
-                    #print('ZAL.: ',math.e ** (delta_cost / self.temperature))
-                    # откат
+                elif random.uniform(0, 1) > math.e ** ((delta_cost / self.temperature) * 100):
                     seq_pair = prev_seq_pair
-                    passabilities = prev_passabilities
-                    statistics.bad_variants += 1
+                    passabilities = prev_passabilities                    
                 else:
                     seq_pair = new_seq_pair
                     passabilities = new_passabilities
-
-            self.temperature = float('{:.{}f}'.format(self.temperature, 100000)) * 0.5
-
-        print(self.get_cost(seq_pair, area))
-        statistics.get_statistics()
+    
+            self.temperature = float('{:.{}f}'.format(self.temperature, 100000)) * 0.2
+    
+        print('Cost after M3:', self.get_cost(seq_pair, area))
         return passabilities
-
+    '''
 """
 ### Rules ###
 (<...xi..xj... > , < ...xi..xj...>)) x[i] is left to x[j]
@@ -348,7 +389,8 @@ after bj in X and before bj in Y
 # seq_pair = [[1, 7, 4, 5, 2, 6, 3, 8], [8, 4, 7, 2, 5, 3, 6, 1]]
 
 # TODO Сделать нормальные ключи для словарей
-'''wid_hei_dict = {
+'''
+wid_hei_dict = {
     1: [2, 4, '1_АХПП'],
     2: [1, 3, '2_Печь'],
     3: [3, 3, '3_Печь_2'],
@@ -358,36 +400,39 @@ after bj in X and before bj in Y
     7: [1, 2, '7_Курилка'],
     8: [2, 4, '8_Паркет'],
 }
-'''
 
-ar = Brandford_1.get_area()
+'''
+from Technomax.calcEquipment import Equipment
+
+data = {'Имя параметра': ['Значение', 'СИ', ''], 'Ширина Размещения': '700000.0', 'Высота Размещения': '500000.0', 'Скорость конвейера': '3.0', 'Шаг цепи': '200.0', 'Размеры детали': ['', '', ''], 'Длина': '3800.0', 'Ширина': '700.0', 'Высота': '1800.0', 'Рекомендации Химиков': ['', '', 'Название Операции'], 'Ванна №1': '150.0', 'Ванна №2': '60.0', 'Ванна №3': '60.0', 'Ванна №4': '', 'Ванна №5': '', 'Ванна №6': '', 'Сушка': '11.0', 'Полимеризация': '21.0', 'Строительная подоснова': '', 'Чертеж кабины': '', 'Obstacles': {}, 'CellSize': 1542.0, 'GridWidth': 35, 'GridHeight': 9, 'Ванна №1 name': 'Обезжиривание', 'Ванна №2 name': 'Промывка', 'Ванна №3 name': 'Промывка деми', 'Ванна №4 name': '', 'Ванна №5 name': '', 'Ванна №6 name': '', 'Сушка name': '', 'Полимеризация name': '', 'Futur': '200', 'Attach_width': '2800', 'numAir': '0', 'Электронагрев': False, 'Воздушная завеса': False, 'Кабина покраски': 'Q-MAX', 'Radius': 500}
+eq = Equipment(data)
+
+ar = eq.get_area()
+print(ar)
 area = Area(ar[0], ar[1])
 area.draw_map()
 
-wid_hei_dict = Brandford_1.get_wid_hei_dict()
-X, Y = Brandford_1.get_sequences()
+wid_hei_dict = eq.packages[12]
+print(wid_hei_dict)
 
-init_seq_pair = SeqPair(X, Y, wid_hei_dict, delta=5)
-print(SimAnnealing.get_cost(init_seq_pair, area))
+X, Y = eq.get_sequences()
 
-# m1_perturb глобально меняет seq_pair
-# new_p = SimAnnealing.m2_perturb(init_seq_pair)
+init_seq_pair = SeqPair(X, Y, wid_hei_dict, delta=2)
+print('Initial cost:', SimAnnealing.get_cost(init_seq_pair, area))
 
-# x_SP_coordinates = init_seq_pair.find_SP_coordinates()[0]
-# y_SP_coordinates = init_seq_pair.find_SP_coordinates()[1]
-# x_y_SP = init_seq_pair.find_SP_coordinates()
-
-annealed_seq_pair = SimAnnealing(40, 2)
-#final_SP = annealed_seq_pair.sim_annealing(init_seq_pair, area)[1]
-#x_y_SA = final_SP.find_SP_coordinates()
-
-#x_y_SA = init_seq_pair.find_SP_coordinates()
-#final_SP = init_seq_pair
-
-# final_SP = res_of_simulation[1]
-
+annealed_seq_pair = SimAnnealing(4000000, 0.1)
 res_of_simulation = annealed_seq_pair.sim_annealing(init_seq_pair, area)
+final_SP = res_of_simulation
+
+print('Simulation succeed!')
+'''
 a = res_of_simulation[0]
 figures = res_of_simulation[1]
+'''
+
+work_shop = TransformSeqPair.to_passabilities(final_SP, area)
+a = work_shop[0]
+figures = work_shop[1]
 
 Draw.window(ar, figures, a)
+# Draw.window_2(ar, figures)

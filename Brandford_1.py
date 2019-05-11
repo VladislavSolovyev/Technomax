@@ -1,7 +1,7 @@
 from Technomax.Routing_A_Star import Coordinate
 
 # g_lambda = 350
-g_lambda = 250
+g_lambda = 350
 gr = g_lambda * 5
 # АХПП
 width1 = 31600//gr + 1
@@ -20,6 +20,7 @@ width5 = 30000//gr + 1
 height5 = 2
 
 area = (700000//gr, 500000//gr)
+
 '''
 wid_hei_dict = {
     1: [height1, width1, '1_АХПП', Coordinate(0, 0), Coordinate(height1 - 1, width1 + 1), '2_Печь'],
@@ -31,13 +32,22 @@ wid_hei_dict = {
 '''
 
 wid_hei_dict = {
-    1: [height1, width1, '1_АХПП', Coordinate(0, 0), Coordinate(2, 0), '2_Печь'],
-    2: [height2, width2, '2_Печь', Coordinate(0, 0), Coordinate(2, 0), '3_Печь_2'],
-    3: [height3, width3, '3_Печь_2', Coordinate(0, 0), Coordinate(2, 0), '4_Кабина'],
-    4: [height4, width4, '4_Кабина', Coordinate(0, 0), Coordinate(2, 0), '5_Зона Загрузки/Выгрузки'],
-    5: [height5, width5, '5_Зона Загрузки/Выгрузки', Coordinate(0, 0), Coordinate(2, 0), '1_АХПП'],
+    1: [height1, width1, '1_АХПП', Coordinate(0, 0), Coordinate(0, 0), '2_Печь'],
+    2: [height2, width2, '2_Печь', Coordinate(0, 0), Coordinate(0, 0), '3_Печь_2'],
+    3: [height3, width3, '3_Печь_2', Coordinate(0, 0), Coordinate(0, 0), '4_Кабина'],
+    4: [height4, width4, '4_Кабина', Coordinate(0, 0), Coordinate(0, 0), '5_Зона Загрузки/Выгрузки'],
+    5: [height5, width5, '5_Зона Загрузки/Выгрузки', Coordinate(0, 0), Coordinate(0, 0), '1_АХПП'],
 }
 
+'''
+wid_hei_dict = {
+    1: [height1, width1, '1_АХПП', Coordinate(1, 1), Coordinate(1, 1), '2_Печь'],
+    2: [height2, width2, '2_Печь', Coordinate(1, 1), Coordinate(1, 1), '3_Печь_2'],
+    3: [height3, width3, '3_Печь_2', Coordinate(1, 1), Coordinate(1, 1), '4_Кабина'],
+    4: [height4, width4, '4_Кабина', Coordinate(1, 1), Coordinate(1, 1), '5_Зона Загрузки/Выгрузки'],
+    5: [height5, width5, '5_Зона Загрузки/Выгрузки', Coordinate(1, 1), Coordinate(1, 1), '1_АХПП'],
+}
+'''
 '''
 wid_hei_dict = {
     1: [height1, width1, '1_АХПП', Coordinate(1, 1), Coordinate(1, 1), '2_Печь'],
