@@ -318,7 +318,7 @@ class Equipment():
             for numO, oven in enumerate(ovens):
                 nameDryer = nD + str(numD)
                 nameOven = nO + str(numO)
-                '''package = {
+                package = {
                     1 : [ahpp['totalLenght'], ahpp['width'], nA, ahpp["In"], ahpp["Out"], nameDryer],
                     2 : [dryer['totalLenght'], dryer['width'], nameDryer, dryer["In"], dryer["Out"], "Кабина"],
                     3 : [11500, 6800, "Кабина", Coordinate(3400, 0), Coordinate(3400, 11500), nameOven],
@@ -326,7 +326,8 @@ class Equipment():
                     # TODO зона разгрузки и погрузки может быть объеденена (как в проекте Брендфорд). Спрашивать об этом можно на этапе задания параметров
                     5 : [5000, 1000, "Зона Разгрузки", Coordinate(500,0), Coordinate(500,5000), "Зона Загрузки"],
                     6 : [5000, 1000, "Зона Загрузки", Coordinate(500,0), Coordinate(500,5000), nA],
-                }'''
+                }
+                '''
                 package = {
                     1 : [ahpp['totalLenght'], ahpp['width'], nA, Coordinate(0, 0), Coordinate(0, 0), nameDryer],
                     2 : [dryer['totalLenght'], dryer['width'], nameDryer, Coordinate(0, 0), Coordinate(0, 0), "Кабина"],
@@ -336,6 +337,7 @@ class Equipment():
                     5 : [5000, 1000, "Зона Разгрузки", Coordinate(0, 0), Coordinate(0, 0), "Зона Загрузки"],
                     6 : [5000, 1000, "Зона Загрузки", Coordinate(0, 0), Coordinate(0, 0), nA],
                 }
+                '''
                 self.packages_mm.append(package)
 
         # вывод на печать

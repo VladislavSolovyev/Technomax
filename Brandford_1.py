@@ -29,8 +29,32 @@ wid_hei_dict = {
     4: [height4, width4, '4_Кабина', Coordinate(0, 0), Coordinate(height4 - 1, width4 + 1), '5_Зона Загрузки/Выгрузки'],
     5: [height5, width5, '5_Зона Загрузки/Выгрузки', Coordinate(0, 0), Coordinate(height5 - 1, width5 + 1), '1_АХПП'],
 }
+X = [1, 3, 4, 5, 2]
+Y = [3, 4, 1, 2, 5]
 '''
 
+wid_hei_dict = {
+    1: [height1, width1, '1_АХПП', Coordinate(0, 0), Coordinate(height1 - 1, width1 + 1), '2_Печь'],
+    2: [height2, width2, '2_Печь', Coordinate(0, 0), Coordinate(height2 - 1, width2 + 1), '3_Печь_2'],
+    3: [height3, width3, '3_Печь_2', Coordinate(0, 0), Coordinate(height3 - 1, width3 + 1), '4_Кабина'],
+    4: [height4, width4, '4_Кабина', Coordinate(0, 0), Coordinate(height4 - 1, width4 + 1), '1_АХПП'],
+
+
+}
+X = [1, 3, 2, 4]
+Y = [3, 1, 2, 4]
+
+
+'''
+wid_hei_dict = {
+    1: [height1, width1, '1_АХПП', Coordinate(0, 0), Coordinate(height1 - 1, width1 + 1), '2_Печь'],
+    2: [height2, width2, '2_Печь', Coordinate(0, 0), Coordinate(height2 - 1, width2 + 1), '1_АХПП'],
+}
+X = [1, 2]
+Y = [2, 1]
+'''
+
+'''
 wid_hei_dict = {
     1: [height1, width1, '1_АХПП', Coordinate(0, 0), Coordinate(0, 0), '2_Печь'],
     2: [height2, width2, '2_Печь', Coordinate(0, 0), Coordinate(0, 0), '3_Печь_2'],
@@ -38,7 +62,7 @@ wid_hei_dict = {
     4: [height4, width4, '4_Кабина', Coordinate(0, 0), Coordinate(0, 0), '5_Зона Загрузки/Выгрузки'],
     5: [height5, width5, '5_Зона Загрузки/Выгрузки', Coordinate(0, 0), Coordinate(0, 0), '1_АХПП'],
 }
-
+'''
 '''
 wid_hei_dict = {
     1: [height1, width1, '1_АХПП', Coordinate(1, 1), Coordinate(1, 1), '2_Печь'],
@@ -50,15 +74,13 @@ wid_hei_dict = {
 '''
 '''
 wid_hei_dict = {
-    1: [height1, width1, '1_АХПП', Coordinate(1, 1), Coordinate(1, 1), '2_Печь'],
+    1: [height1, width1, '1_АХПП', Coordinate(0, 0), Coordinate(1, 1), '2_Печь'],
     2: [height2, width2, '2_Печь', Coordinate(0, 0), Coordinate(height2 - 1, width2 + 1), '3_Печь_2'],
     3: [height3, width3, '3_Печь_2', Coordinate(0, 0), Coordinate(height3 - 1, width3 + 1), '4_Кабина'],
-    4: [height4, width4, '4_Кабина', Coordinate(1, 1), Coordinate(1, 1), '5_Зона Загрузки/Выгрузки'],
-    5: [height5, width5, '5_Зона Загрузки/Выгрузки', Coordinate(1, 1), Coordinate(1, 1), '1_АХПП'],
+    4: [height4, width4, '4_Кабина', Coordinate(0, 0), Coordinate(1, 1), '5_Зона Загрузки/Выгрузки'],
+    5: [height5, width5, '5_Зона Загрузки/Выгрузки', Coordinate(0, 0), Coordinate(1, 1), '1_АХПП'],
 }
 '''
-X = [1, 3, 4, 5, 2]
-Y = [3, 4, 1, 2, 5]
 
 def get_sequences():
     return X, Y
