@@ -21,7 +21,7 @@ height5 = 2
 
 area = (700000//gr, 500000//gr)
 
-'''
+
 wid_hei_dict = {
     1: [height1, width1, '1_АХПП', Coordinate(0, 0), Coordinate(height1 - 1, width1 + 1), '2_Печь'],
     2: [height2, width2, '2_Печь', Coordinate(0, 0), Coordinate(height2 - 1, width2 + 1), '3_Печь_2'],
@@ -31,8 +31,8 @@ wid_hei_dict = {
 }
 X = [1, 3, 4, 5, 2]
 Y = [3, 4, 1, 2, 5]
-'''
 
+'''
 wid_hei_dict = {
     1: [height1, width1, '1_АХПП', Coordinate(0, 0), Coordinate(height1 - 1, width1 + 1), '2_Печь'],
     2: [height2, width2, '2_Печь', Coordinate(0, 0), Coordinate(height2 - 1, width2 + 1), '3_Печь_2'],
@@ -43,7 +43,7 @@ wid_hei_dict = {
 }
 X = [1, 3, 2, 4]
 Y = [3, 1, 2, 4]
-
+'''
 
 '''
 wid_hei_dict = {

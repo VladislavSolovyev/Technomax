@@ -8,7 +8,7 @@ import copy
 
 
 class Statistics:
-    def __init__(self, m1_count=0, m2_count=0, m3_count=0, bad_variants=0, good_variants=0, AHPP_m3 = 0):
+    def __init__(self, m1_count=0, m2_count=0, m3_count=0, bad_variants=0, good_variants=0, AHPP_m3=0):
         self.m1_count = m1_count
         self.m2_count = m2_count
         self.m3_count = m3_count
@@ -29,6 +29,7 @@ class SeqPair:
         self.Y = Y
         self.wid_hei_dict = wid_hei_dict
         self.delta = delta
+
     '''
     def modify_wid_hei_dict(self):
         tmp_wid_hei_dict = dict()
@@ -39,7 +40,7 @@ class SeqPair:
 
     def find_SP_coordinates(self):
 
-        #tmp_wid_hei_dict = self.modify_wid_hei_dict()
+        # tmp_wid_hei_dict = self.modify_wid_hei_dict()
         tmp_wid_hei_dict = self.wid_hei_dict
 
         """
@@ -92,7 +93,7 @@ class SeqPair:
                 else:
                     break
         x_SP_coordinates = P
-        #print(x_SP_coordinates)
+        # print(x_SP_coordinates)
         # ALGORITHM for y coordinate:
         P = [0 for _ in range(len(self.X))]
         match = ForMatching({}, {})
@@ -117,7 +118,7 @@ class SeqPair:
                     break
 
         y_SP_coordinates = P
-        #print(y_SP_coordinates)
+        # print(y_SP_coordinates)
 
         for i in range(len(x_SP_coordinates)):
             x_SP_coordinates[i] = x_SP_coordinates[i] + self.delta
@@ -156,6 +157,8 @@ class TransformSeqPair:
 
         sum_length = 0
         num_of_conveyors_added = 0
+        conveyors = []
+        del conveyors[:]
 
         for i in range(len(figures)):
             a = area.figure_adding(figures[i])
@@ -163,17 +166,18 @@ class TransformSeqPair:
             tmp = figure.neighbor_name
             coordinate_to = None
             for now_figure in figures:
-                #print(now_figure.name)
-                #print(tmp)
+                # print(now_figure.name)
+                # print(tmp)
                 if now_figure.name == tmp:
                     coordinate_to = now_figure.out_point
-            a = area.conveyor_adding(figure.in_point, coordinate_to)
+            a, conveyor = area.conveyor_adding(figure.in_point, coordinate_to)
+            conveyors.append(conveyor)
             buf = area.conveyor_adding(figure.in_point, coordinate_to, only_path_len=True)
             if buf != 0:
                 sum_length += buf
                 num_of_conveyors_added += 1
 
-        return a, figures, num_of_conveyors_added, sum_length
+        return a, figures, num_of_conveyors_added, sum_length, conveyors
 
 
 class SimAnnealing:
@@ -252,7 +256,7 @@ class SimAnnealing:
                 if start_points_y[j] + seq_pair.wid_hei_dict[j + 1][1] - 1 > max_y:
                     max_y = start_points_y[j] + seq_pair.wid_hei_dict[j + 1][1] - 1
             max_width = max_y
-            #print(max_width * max_height)
+            # print(max_width * max_height)
             return max_width, max_height
 
         def get_total_manhattan_length():
@@ -271,16 +275,16 @@ class SimAnnealing:
                 j = i
                 while j < len(start_points_x):
                     total_manhattan_length += abs(get_central_point(i).x - get_central_point(j).x) + \
-                                         abs(get_central_point(i).y - get_central_point(j).y)
+                                              abs(get_central_point(i).y - get_central_point(j).y)
                     j += 1
             return total_manhattan_length
 
-        #def get_total_conveyor_length():
-            #return sum_length
+        # def get_total_conveyor_length():
+        # return sum_length
 
         total_area = get_total_area()
         total_manhattan_length = get_total_manhattan_length()
-        #total_conveyor_length = get_total_conveyor_length()
+        # total_conveyor_length = get_total_conveyor_length()
 
         return total_manhattan_length
 
@@ -294,7 +298,6 @@ class SimAnnealing:
     # TODO Annealing for pre-placement
     def sim_annealing(self, seq_pair, area):
         statistics = Statistics(0, 0, 0, 0)
-
         while self.temperature > self.frozen:
             for _ in range(1000):
                 prev_seq_pair = copy.deepcopy(seq_pair)
@@ -311,7 +314,6 @@ class SimAnnealing:
                     new_seq_pair = self.m1_perturb(seq_pair)
                     statistics.m1_count += 1
                 delta_cost = self.get_cost(new_seq_pair, area) - prev_cost
-
                 if delta_cost > 0:
                     seq_pair = prev_seq_pair
                     # if seq_pair.wid_hei_dict[5][0] != 2:
@@ -332,16 +334,13 @@ class SimAnnealing:
         print('Cost after annealing:', self.get_cost(seq_pair, area))
         statistics.get_statistics()
         return seq_pair
-
     # TODO Annealing for conveyor_adding
     def sim_annealing_M3(self, seq_pair, area):
         seq_pair = self.sim_annealing(seq_pair, area)
         print('init', (seq_pair.X, seq_pair.Y))
         passabilities = TransformSeqPair.to_passabilities(seq_pair, area)
-
         for now in passabilities:
             print('Parametr', now)
-
         print(self.get_cost_conveyor(seq_pair, area))
         # M3
         self.temperature = 40
@@ -370,9 +369,9 @@ class SimAnnealing:
                 else:
                     seq_pair = new_seq_pair
                     passabilities = new_passabilities
-    
+
             self.temperature = float('{:.{}f}'.format(self.temperature, 100000)) * 0.1
-    
+
         print('Cost after M3:', self.get_cost_conveyor(seq_pair, area))
         return passabilities
     '''
@@ -405,17 +404,16 @@ class SimAnnealing:
                 if number % 2 == 1:
                     w_h_d[j][0] = copy.deepcopy(seq_pair.wid_hei_dict[j][1])
                     w_h_d[j][1] = copy.deepcopy(seq_pair.wid_hei_dict[j][0])
-                    w_h_d[j][3].x, w_h_d[j][3].y = copy.deepcopy(seq_pair.wid_hei_dict[j][3].y),\
-                                                    copy.deepcopy(seq_pair.wid_hei_dict[j][3].x)
-                    w_h_d[j][4].x, w_h_d[j][4].y = copy.deepcopy(seq_pair.wid_hei_dict[j][3].y),\
-                                                    copy.deepcopy(seq_pair.wid_hei_dict[j][3].x)
-
+                    w_h_d[j][3].x, w_h_d[j][3].y = copy.deepcopy(seq_pair.wid_hei_dict[j][3].y), \
+                                                   copy.deepcopy(seq_pair.wid_hei_dict[j][3].x)
+                    w_h_d[j][4].x, w_h_d[j][4].y = copy.deepcopy(seq_pair.wid_hei_dict[j][4].y) - 2, \
+                                                   copy.deepcopy(seq_pair.wid_hei_dict[j][4].x) + 2
 
                 number = number // 2
             buf = copy.deepcopy(w_h_d)
             w_h_d_list.append(buf)
 
-        #w_h_d_list = get_w_h_d_list()
+        # w_h_d_list = get_w_h_d_list()
         print('len of w_h_d_list:', len(w_h_d_list))
         new_seq = seq_pair
         print(new_seq.X)
@@ -483,24 +481,31 @@ wid_hei_dict = {
     7: [1, 2, '7_Курилка'],
     8: [2, 4, '8_Паркет'],
 }
-
 '''
 from Technomax.calcEquipment import Equipment
 
-data = {'Имя параметра': ['Значение', 'СИ', ''], 'Ширина Размещения': '700000.0', 'Высота Размещения': '500000.0', 'Скорость конвейера': '3.0', 'Шаг цепи': '200.0', 'Размеры детали': ['', '', ''], 'Длина': '3800.0', 'Ширина': '700.0', 'Высота': '1800.0', 'Рекомендации Химиков': ['', '', 'Название Операции'], 'Ванна №1': '150.0', 'Ванна №2': '60.0', 'Ванна №3': '60.0', 'Ванна №4': '', 'Ванна №5': '', 'Ванна №6': '', 'Сушка': '11.0', 'Полимеризация': '21.0', 'Строительная подоснова': '', 'Чертеж кабины': '', 'Obstacles': {}, 'CellSize': 1542.0, 'GridWidth': 35, 'GridHeight': 9, 'Ванна №1 name': 'Обезжиривание', 'Ванна №2 name': 'Промывка', 'Ванна №3 name': 'Промывка деми', 'Ванна №4 name': '', 'Ванна №5 name': '', 'Ванна №6 name': '', 'Сушка name': '', 'Полимеризация name': '', 'Futur': '200', 'Attach_width': '2800', 'numAir': '0', 'Электронагрев': False, 'Воздушная завеса': False, 'Кабина покраски': 'Q-MAX', 'Radius': 500}
+data = {'Имя параметра': ['Значение', 'СИ', ''], 'Ширина Размещения': '700000.0', 'Высота Размещения': '500000.0',
+        'Скорость конвейера': '3.0', 'Шаг цепи': '200.0', 'Размеры детали': ['', '', ''], 'Длина': '3800.0',
+        'Ширина': '700.0', 'Высота': '1800.0', 'Рекомендации Химиков': ['', '', 'Название Операции'],
+        'Ванна №1': '150.0', 'Ванна №2': '60.0', 'Ванна №3': '60.0', 'Ванна №4': '', 'Ванна №5': '', 'Ванна №6': '',
+        'Сушка': '11.0', 'Полимеризация': '21.0', 'Строительная подоснова': '', 'Чертеж кабины': '', 'Obstacles': {},
+        'CellSize': 1542.0, 'GridWidth': 35, 'GridHeight': 9, 'Ванна №1 name': 'Обезжиривание',
+        'Ванна №2 name': 'Промывка', 'Ванна №3 name': 'Промывка деми', 'Ванна №4 name': '', 'Ванна №5 name': '',
+        'Ванна №6 name': '', 'Сушка name': '', 'Полимеризация name': '', 'Futur': '200', 'Attach_width': '2800',
+        'numAir': '0', 'Электронагрев': False, 'Воздушная завеса': False, 'Кабина покраски': 'Q-MAX', 'Radius': 500}
 eq = Equipment(data)
 
-#ar = eq.get_area()
+# ar = eq.get_area()
 ar = Brandford_1.get_area()
 print(ar)
 area = Area(ar[0], ar[1])
 area.draw_map()
 
-#wid_hei_dict = eq.packages[3]
+# wid_hei_dict = eq.packages[3]
 wid_hei_dict = Brandford_1.get_wid_hei_dict()
 print(wid_hei_dict)
 
-#X, Y = eq.get_sequences()
+# X, Y = eq.get_sequences()
 X, Y = Brandford_1.get_sequences()
 
 init_seq_pair = SeqPair(X, Y, wid_hei_dict, delta=2)
@@ -508,7 +513,7 @@ print('Initial cost:', SimAnnealing.get_cost(init_seq_pair, area))
 
 annealed_seq_pair = SimAnnealing(4000000, 2)
 
-#final_SP = res_of_simulation
+# final_SP = res_of_simulation
 
 
 '''
@@ -516,23 +521,23 @@ a = res_of_simulation[0]
 figures = res_of_simulation[1]
 '''
 
-#work_shop = TransformSeqPair.to_passabilities(final_SP, area)
+# work_shop = TransformSeqPair.to_passabilities(final_SP, area)
 work_shop = annealed_seq_pair.sim_annealing(init_seq_pair, area)
 
 print('Simulation succeed!')
-#a = work_shop[0]
+# a = work_shop[0]
 
-#figures = work_shop[1]
+# figures = work_shop[1]
 
 print(len(work_shop))
 rand_ind = random.randrange(0, len(work_shop))
 
-#print('Final cost', SimAnnealing.get_cost(work_shop[3], area))
-#[print(work_shop[i]) for i in range(len(work_shop))]
+# print('Final cost', SimAnnealing.get_cost(work_shop[3], area))
+# [print(work_shop[i]) for i in range(len(work_shop))]
 tmp = TransformSeqPair.to_passabilities(work_shop[-1], area)
 a = tmp[0]
 figures = tmp[1]
 
-Draw.window(ar, figures, a)
+Draw.window(ar, figures, a, tmp[4])
 
-#Draw.window_2(ar, figures)
+# Draw.window_2(ar, figures)

@@ -25,6 +25,11 @@ class Routing:
         def __eq__(self, other_node):   # Переопределяем встроенный метод "равенство"
             return self.coordinate == other_node.coordinate  # У coordinate уже два поля???
 
+        def change_direction(self, parent_node):
+            if self.coordinate.x != parent_node.coordinate.x or self.coordinate.y != parent_node.coordinate.y:
+                return True
+            return False
+
         def generate_children(self, area):  # Открываем потомков
             children = []
 
@@ -105,8 +110,11 @@ class Routing:
                 if child in closed_set:                    # !!! Проверка не было ли такого состояния раньше !!!
                     continue
             # Для потомка находим тек. оценку, эврист. оценку и оценочную функцию
+                if child.change_direction(best_node):
+                    child.g = best_node.g + 10 + area.get_passability(child.coordinate)
+                else:
+                    child.g = best_node.g + area.get_passability(child.coordinate)
 
-                child.g = best_node.g + area.get_passability(child.coordinate)
                 # print(best_node.g, area.get_passability(child.coordinate))
                 child.h = child.coordinate.get_length(coordinate_to)
                 #print((child.g, child.h))
