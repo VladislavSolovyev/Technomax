@@ -9,8 +9,13 @@ class Coordinate:
     def __str__(self):
         return '(x:{}, y:{})'.format(self.x, self.y)
 
-    def get_length(self, other):  # Манхетоновское расстояние
-        return abs(self.x - other.x) + abs(self.y - other.y)
+    #def get_length(self, other):  # Манхетоновское расстояние
+        #return 1.1 * (abs(self.x - other.x) + abs(self.y - other.y))
+    def get_length(self, other, start_point):
+        dx1, dy1 = self.x - other.x, self.y - other.y
+        dx2, dy2 = start_point.x - other.x, start_point.y - other.y
+        cross = abs(dx1*dy2 - dx2*dy1)
+        return(abs(self.x - other.x) + abs(self.y - other.y)) - cross*0.001
 
 
 class Routing:
@@ -26,7 +31,7 @@ class Routing:
             return self.coordinate == other_node.coordinate  # У coordinate уже два поля???
 
         def change_direction(self, parent_node):
-            if self.coordinate.x != parent_node.coordinate.x or self.coordinate.y != parent_node.coordinate.y:
+            if self.coordinate.x != parent_node.coordinate.x:
                 return True
             return False
 
@@ -35,8 +40,8 @@ class Routing:
 
             # TODO Рскрытие потомков влияет на работу поиска на графе
             coordinates = [
-                Coordinate(self.coordinate.x, self.coordinate.y + 1),
                 Coordinate(self.coordinate.x + 1, self.coordinate.y),
+                Coordinate(self.coordinate.x, self.coordinate.y + 1),
                 Coordinate(self.coordinate.x - 1, self.coordinate.y),
                 Coordinate(self.coordinate.x, self.coordinate.y - 1),
             ]
@@ -75,7 +80,7 @@ class Routing:
 
         root = Routing.Node(None, coordinate_from)          # Первый узел (корень)
         root.g = 0.0
-        root.h = root.coordinate.get_length(coordinate_to)  # Эвристика -- манхет. расстояние от нуля до термин. ноды
+        root.h = root.coordinate.get_length(coordinate_to, coordinate_from)  # Эвристика -- манхет. расстояние от нуля до термин. ноды
         #print('root.h =', root.h)
         # TODO root.h = 0 - поиск в ширину
         root.f = root.g + root.h                            # Оценочная функция для корня
@@ -111,12 +116,12 @@ class Routing:
                     continue
             # Для потомка находим тек. оценку, эврист. оценку и оценочную функцию
                 if child.change_direction(best_node):
-                    child.g = best_node.g + 10 + area.get_passability(child.coordinate)
+                    child.g = best_node.g + 1 + area.get_passability(child.coordinate)
                 else:
                     child.g = best_node.g + area.get_passability(child.coordinate)
 
                 # print(best_node.g, area.get_passability(child.coordinate))
-                child.h = child.coordinate.get_length(coordinate_to)
+                child.h = child.coordinate.get_length(coordinate_to, coordinate_from)
                 #print((child.g, child.h))
                 child.f = child.g + child.h
 

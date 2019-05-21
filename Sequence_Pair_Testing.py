@@ -122,7 +122,6 @@ class SeqPair:
 
         for i in range(len(x_SP_coordinates)):
             x_SP_coordinates[i] = x_SP_coordinates[i] + self.delta
-
         for i in range(len(y_SP_coordinates)):
             y_SP_coordinates[i] = y_SP_coordinates[i] + self.delta
 
@@ -170,12 +169,12 @@ class TransformSeqPair:
                 # print(tmp)
                 if now_figure.name == tmp:
                     coordinate_to = now_figure.out_point
-            a, conveyor = area.conveyor_adding(figure.in_point, coordinate_to)
+            a, buf_len, conveyor = area.conveyor_adding(figure.in_point, coordinate_to)
             conveyors.append(conveyor)
-            buf = area.conveyor_adding(figure.in_point, coordinate_to, only_path_len=True)
-            if buf != 0:
-                sum_length += buf
-                num_of_conveyors_added += 1
+            #print(buf_len)
+            if buf_len != 0:
+                sum_length += buf_len
+                #num_of_conveyors_added += 1
 
         return a, figures, num_of_conveyors_added, sum_length, conveyors
 
@@ -274,8 +273,8 @@ class SimAnnealing:
             for i in range(len(start_points_x)):
                 j = i
                 while j < len(start_points_x):
-                    total_manhattan_length += abs(get_central_point(i).x - get_central_point(j).x) + \
-                                              abs(get_central_point(i).y - get_central_point(j).y)
+                    total_manhattan_length += abs(get_central_point(i).x - get_central_point(j).x) #+ \
+                                              #abs(get_central_point(i).y - get_central_point(j).y)
                     j += 1
             return total_manhattan_length
 
@@ -286,27 +285,26 @@ class SimAnnealing:
         total_manhattan_length = get_total_manhattan_length()
         # total_conveyor_length = get_total_conveyor_length()
 
-        return total_manhattan_length
+        return total_manhattan_length + total_area[0] * total_area[1]
 
     @classmethod
     def get_cost_conveyor(cls, seq_pair, area):
         sum_length = TransformSeqPair.to_passabilities(seq_pair, area)[3]
-
         return sum_length
 
-    '''
+
     # TODO Annealing for pre-placement
     def sim_annealing(self, seq_pair, area):
         statistics = Statistics(0, 0, 0, 0)
         while self.temperature > self.frozen:
-            for _ in range(1000):
+            for _ in range(100):
                 prev_seq_pair = copy.deepcopy(seq_pair)
                 prev_cost = self.get_cost(prev_seq_pair, area)
                 # TODO сделать Тимберфульфа: P(m1)=4/5, P(m2)=1/5. If m1 rejected => m3 with P(1/10)
                 random_unif = random.random()
                 if random_unif < 0.1:
                     new_seq_pair = self.m3_perturb(seq_pair)
-                    statistics.m2_count += 1
+                    statistics.m3_count += 1
                 elif random_unif < 0.4:
                     new_seq_pair = self.m2_perturb(seq_pair)
                     statistics.m2_count += 1
@@ -319,9 +317,10 @@ class SimAnnealing:
                     # if seq_pair.wid_hei_dict[5][0] != 2:
                     # print('Загрузка/выгрузка perturbation')
                     statistics.good_variants += 1
-                elif random.uniform(0.01, 1.0) < (math.e ** (-1 / (self.temperature / 400000))) and delta_cost < 0:
-                    seq_pair = prev_seq_pair
-                    statistics.bad_variants += 1
+                elif delta_cost < 0:
+                    if random.uniform(0.01, 1.0) < math.e ** (delta_cost / (self.temperature)):
+                        seq_pair = prev_seq_pair
+                        statistics.bad_variants += 1
                 else:
                     seq_pair = new_seq_pair
             # SCHEDULE
@@ -334,48 +333,60 @@ class SimAnnealing:
         print('Cost after annealing:', self.get_cost(seq_pair, area))
         statistics.get_statistics()
         return seq_pair
+
     # TODO Annealing for conveyor_adding
+
     def sim_annealing_M3(self, seq_pair, area):
         seq_pair = self.sim_annealing(seq_pair, area)
+        buf = seq_pair
         print('init', (seq_pair.X, seq_pair.Y))
-        passabilities = TransformSeqPair.to_passabilities(seq_pair, area)
-        for now in passabilities:
-            print('Parametr', now)
-        print(self.get_cost_conveyor(seq_pair, area))
+        passabilities = TransformSeqPair.to_passabilities(buf, area)
+        print(passabilities[1])
+
+        #print(self.get_cost_conveyor(seq_pair, area))
         # M3
-        self.temperature = 40
-        while self.temperature > self.frozen:
-            for _ in range(10):
+        self.temperature = 10
+        while self.temperature > 2:
+            for _ in range(2):
                 prev_seq_pair = copy.deepcopy(seq_pair)
                 #print('current',(prev_seq_pair.X, prev_seq_pair.Y))
-                prev_cost = self.get_cost_conveyor(prev_seq_pair, area)
+                prev_cost = 2*self.get_cost_conveyor(prev_seq_pair, area) + self.get_cost(prev_seq_pair, area)
                 #print('prev_cost', prev_cost)
-                new_seq_pair = seq_pair
-                prev_passabilities = TransformSeqPair.to_passabilities(seq_pair, area)
-                new_passabilities = prev_passabilities
-                if random.random() < 0.5:
+                #new_seq_pair = seq_pair
+                prev_passabilities = TransformSeqPair.to_passabilities(prev_seq_pair, area)
+                print('prev_cost', prev_cost)
+                #new_passabilities = prev_passabilities
+                random_unif = random.random()
+                if random_unif < 0.1:
                     new_seq_pair = self.m3_perturb(seq_pair)
-                    new_passabilities = TransformSeqPair.to_passabilities(seq_pair, area)
-                delta_cost = self.get_cost_conveyor(new_seq_pair, area) - prev_cost
+                    new_passabilities = TransformSeqPair.to_passabilities(new_seq_pair, area)
+                elif random_unif < 0.4:
+                    new_seq_pair = self.m2_perturb(seq_pair)
+                    new_passabilities = TransformSeqPair.to_passabilities(new_seq_pair, area)
+                else:
+                    new_seq_pair = self.m1_perturb(seq_pair)
+                    new_passabilities = TransformSeqPair.to_passabilities(new_seq_pair, area)
+                delta_cost = 2*self.get_cost_conveyor(new_seq_pair, area) + self.get_cost(prev_seq_pair, area) - prev_cost
                 #print('delta cost', delta_cost)
                 # print(delta_cost)
                 # TODO глобально меняет seq_pair, поэтому все PERTURB аксептятся
                 if delta_cost > 0:
                     seq_pair = prev_seq_pair
                     passabilities = prev_passabilities
-                elif delta_cost < 0 and random.uniform(0.1, 1) > math.e ** (delta_cost / self.temperature):
-                    seq_pair = prev_seq_pair
-                    passabilities = prev_passabilities                    
+                elif delta_cost < 0:
+                    if random.uniform(0.1, 1) > math.e ** (delta_cost / self.temperature):
+                        seq_pair = prev_seq_pair
+                        passabilities = prev_passabilities
                 else:
                     seq_pair = new_seq_pair
                     passabilities = new_passabilities
 
-            self.temperature = float('{:.{}f}'.format(self.temperature, 100000)) * 0.1
+            self.temperature = float('{:.{}f}'.format(self.temperature, 100000)) * 0.5
 
         print('Cost after M3:', self.get_cost_conveyor(seq_pair, area))
         return passabilities
-    '''
 
+    '''
     @classmethod
     def M1(cls, seq_pair, i, j):
         seq_pair.X[i], seq_pair.X[j] = seq_pair.X[j], seq_pair.X[i]
@@ -456,7 +467,7 @@ class SimAnnealing:
         print(filtred_list[-1].wid_hei_dict)
         return filtred_list
 
-
+        '''
 """
 ### Rules ###
 (<...xi..xj... > , < ...xi..xj...>)) x[i] is left to x[j]
@@ -508,10 +519,10 @@ print(wid_hei_dict)
 # X, Y = eq.get_sequences()
 X, Y = Brandford_1.get_sequences()
 
-init_seq_pair = SeqPair(X, Y, wid_hei_dict, delta=2)
+init_seq_pair = SeqPair(X, Y, wid_hei_dict, delta=3)
 print('Initial cost:', SimAnnealing.get_cost(init_seq_pair, area))
 
-annealed_seq_pair = SimAnnealing(4000000, 2)
+annealed_seq_pair = SimAnnealing(40000, 2)
 
 # final_SP = res_of_simulation
 
@@ -522,19 +533,20 @@ figures = res_of_simulation[1]
 '''
 
 # work_shop = TransformSeqPair.to_passabilities(final_SP, area)
-work_shop = annealed_seq_pair.sim_annealing(init_seq_pair, area)
+work_shop = annealed_seq_pair.sim_annealing_M3(init_seq_pair, area)
 
 print('Simulation succeed!')
 # a = work_shop[0]
 
 # figures = work_shop[1]
 
-print(len(work_shop))
-rand_ind = random.randrange(0, len(work_shop))
+# print(len(work_shop))
+#rand_ind = random.randrange(0, len(work_shop))
 
 # print('Final cost', SimAnnealing.get_cost(work_shop[3], area))
 # [print(work_shop[i]) for i in range(len(work_shop))]
-tmp = TransformSeqPair.to_passabilities(work_shop[-1], area)
+#tmp = TransformSeqPair.to_passabilities(work_shop, area)
+tmp = work_shop
 a = tmp[0]
 figures = tmp[1]
 

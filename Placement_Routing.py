@@ -82,10 +82,8 @@ class Area:
 
         return self.passabilities
 
-    def conveyor_adding(self, coordinate_from, coordinate_to, only_path_len=None):
+    def conveyor_adding(self, coordinate_from, coordinate_to):
         path = Routing.get_path(self, coordinate_from, coordinate_to)
-        if only_path_len:
-            return len(path)
         #print("Length of path =", len(path))
         #print("Path coordinates:")
         #for i in range(len(path)):
@@ -100,7 +98,7 @@ class Area:
             #print('Path does not exist')
 
         # print(list_of_walls)
-        return self.passabilities, copy_path
+        return self.passabilities, len(copy_path), copy_path
 
 
 def coordinates_checker(start_point, finish_point):
