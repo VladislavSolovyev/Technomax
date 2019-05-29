@@ -140,6 +140,7 @@ class TransformSeqPair:
                     x_y_SP_coordinates[0][i],
                     x_y_SP_coordinates[1][i]
                 ),
+                # TODO сюда можно добавить формулу для нахождения нижнего правого угла
                 Coordinate(
                     x_y_SP_coordinates[0][i] + seq_pair.wid_hei_dict[i + 1][0] - 1,
                     x_y_SP_coordinates[1][i] + seq_pair.wid_hei_dict[i + 1][1] - 1
@@ -221,6 +222,7 @@ class SimAnnealing:
         seq_pair.wid_hei_dict[rand_ind][0], seq_pair.wid_hei_dict[rand_ind][1] = \
             seq_pair.wid_hei_dict[rand_ind][1], seq_pair.wid_hei_dict[rand_ind][0]
 
+        # TODO чтобы повернуть на 90* нужно поменять на 1 число в (ui, vi)
         seq_pair.wid_hei_dict[rand_ind][3].x, seq_pair.wid_hei_dict[rand_ind][3].y = \
             seq_pair.wid_hei_dict[rand_ind][3].y, seq_pair.wid_hei_dict[rand_ind][3].x
 
@@ -285,7 +287,7 @@ class SimAnnealing:
         total_manhattan_length = get_total_manhattan_length()
         # total_conveyor_length = get_total_conveyor_length()
 
-        return total_manhattan_length + total_area[0] * total_area[1]
+        return total_manhattan_length# + total_area[0] * total_area[1]
 
     @classmethod
     def get_cost_conveyor(cls, seq_pair, area):
@@ -323,6 +325,7 @@ class SimAnnealing:
                         statistics.bad_variants += 1
                 else:
                     seq_pair = new_seq_pair
+
             # SCHEDULE
             if self.temperature > 100000:
                 self.temperature = float('{:.{}f}'.format(self.temperature, 100000)) * 0.8
@@ -335,7 +338,7 @@ class SimAnnealing:
         return seq_pair
 
     # TODO Annealing for conveyor_adding
-
+    '''
     def sim_annealing_M3(self, seq_pair, area):
         seq_pair = self.sim_annealing(seq_pair, area)
         buf = seq_pair
@@ -385,7 +388,7 @@ class SimAnnealing:
 
         print('Cost after M3:', self.get_cost_conveyor(seq_pair, area))
         return passabilities
-
+    '''
     '''
     @classmethod
     def M1(cls, seq_pair, i, j):
@@ -519,7 +522,7 @@ print(wid_hei_dict)
 # X, Y = eq.get_sequences()
 X, Y = Brandford_1.get_sequences()
 
-init_seq_pair = SeqPair(X, Y, wid_hei_dict, delta=3)
+init_seq_pair = SeqPair(X, Y, wid_hei_dict, delta=2)
 print('Initial cost:', SimAnnealing.get_cost(init_seq_pair, area))
 
 annealed_seq_pair = SimAnnealing(40000, 2)
@@ -533,7 +536,7 @@ figures = res_of_simulation[1]
 '''
 
 # work_shop = TransformSeqPair.to_passabilities(final_SP, area)
-work_shop = annealed_seq_pair.sim_annealing_M3(init_seq_pair, area)
+work_shop = annealed_seq_pair.sim_annealing(init_seq_pair, area)
 
 print('Simulation succeed!')
 # a = work_shop[0]
@@ -545,8 +548,8 @@ print('Simulation succeed!')
 
 # print('Final cost', SimAnnealing.get_cost(work_shop[3], area))
 # [print(work_shop[i]) for i in range(len(work_shop))]
-#tmp = TransformSeqPair.to_passabilities(work_shop, area)
-tmp = work_shop
+tmp = TransformSeqPair.to_passabilities(work_shop, area)
+#tmp = work_shop
 a = tmp[0]
 figures = tmp[1]
 

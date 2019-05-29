@@ -15,7 +15,7 @@ class Coordinate:
         dx1, dy1 = self.x - other.x, self.y - other.y
         dx2, dy2 = start_point.x - other.x, start_point.y - other.y
         cross = abs(dx1*dy2 - dx2*dy1)
-        return(abs(self.x - other.x) + abs(self.y - other.y)) - cross*0.001
+        return abs(self.x - other.x) + abs(self.y - other.y)# - cross*0.001
 
 
 class Routing:
@@ -30,8 +30,8 @@ class Routing:
         def __eq__(self, other_node):   # Переопределяем встроенный метод "равенство"
             return self.coordinate == other_node.coordinate  # У coordinate уже два поля???
 
-        def change_direction(self, parent_node):
-            if self.coordinate.x != parent_node.coordinate.x:
+        def change_direction(self, granny_node):
+            if (self.coordinate.y != granny_node.coordinate.y) and (self.coordinate.x != granny_node.coordinate.x):
                 return True
             return False
 
@@ -77,7 +77,6 @@ class Routing:
         if area.get_passability(coordinate_from) == -2:  # or -2:  # Если координата -- другой конвейер
             return []
 
-
         root = Routing.Node(None, coordinate_from)          # Первый узел (корень)
         root.g = 0.0
         root.h = root.coordinate.get_length(coordinate_to, coordinate_from)  # Эвристика -- манхет. расстояние от нуля до термин. ноды
@@ -109,16 +108,24 @@ class Routing:
             # print('len of openset =',len(open_set))
             closed_set.append(best_node)                   # Отправляем его в список закрытых
 
+            granny_node = root
+            if len(closed_set) > 1:
+                granny_node = closed_set[-2]
+                print(granny_node.coordinate)
+
+
             children = best_node.generate_children(area)   # Если best оказался не термин., то открываем потомков дальше
             #print('len of children:', len(children))
             for child in children:
                 if child in closed_set:                    # !!! Проверка не было ли такого состояния раньше !!!
                     continue
             # Для потомка находим тек. оценку, эврист. оценку и оценочную функцию
-                if child.change_direction(best_node):
-                    child.g = best_node.g + 1 + area.get_passability(child.coordinate)
+                if child.change_direction(granny_node):
+                    #print('Not OK')
+                    child.g = best_node.g + 0.1 + area.get_passability(child.coordinate)
                 else:
                     child.g = best_node.g + area.get_passability(child.coordinate)
+                    #print('OK')
 
                 # print(best_node.g, area.get_passability(child.coordinate))
                 child.h = child.coordinate.get_length(coordinate_to, coordinate_from)
