@@ -23,12 +23,12 @@ area = (700000//gr, 500000//gr)
 
 
 wid_hei_dict = {
-    1: [height1, width1, '1_АХПП', Coordinate(0, 0), Coordinate(height1 - 1, width1 + 1), '2_Печь'],
-    2: [height2, width2, '2_Печь', Coordinate(0, 0), Coordinate(height2 - 1, width2 + 1), '3_Печь_2'],
-    3: [height3, width3, '3_Печь_2', Coordinate(0, 0), Coordinate(height3 - 1, width3 + 1), '4_Кабина'],
-    4: [height4, width4, '4_Кабина', Coordinate(0, 0), Coordinate(height4 - 1, width4 + 1), '5_Зона Загрузки/Выгрузки'],
-    5: [height5, width5, '5_Зона Загрузки/Выгрузки', Coordinate(0, 0), Coordinate(0, width5 + 1), '6_Зона Загрузки/Выгрузки_2'],
-    6: [height5, width5, '6_Зона Загрузки/Выгрузки_2',Coordinate(0, 0), Coordinate(0, width5 + 1), '1_АХПП'],
+    1: [height1, width1, '1_АХПП', Coordinate(0, 0), Coordinate(0, 0), '2_Печь', [0, 0]],
+    2: [height2, width2, '2_Печь', Coordinate(0, 0), Coordinate(0, 0), '3_Печь_2', [0, 0]],
+    3: [height3, width3, '3_Печь_2', Coordinate(0, 0), Coordinate(0, 0), '4_Кабина', [0, 0]],
+    4: [height4, width4, '4_Кабина', Coordinate(0, 0), Coordinate(0, 0), '5_Зона Загрузки/Выгрузки', [0, 0]],
+    5: [height5, width5, '5_Зона Загрузки/Выгрузки', Coordinate(0, 0), Coordinate(0, 0), '6_Зона Загрузки/Выгрузки_2', [0, 0]],
+    6: [height5, width5, '6_Зона Загрузки/Выгрузки_2',Coordinate(0, 0), Coordinate(0, 0), '1_АХПП', [0, 0]],
 }
 X = [1, 3, 4, 5, 2, 6]
 Y = [3, 4, 1, 2, 5, 6]

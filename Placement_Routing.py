@@ -5,7 +5,7 @@ from Technomax.Routing_A_Star import Routing, Coordinate
 
 
 class Figure:
-    def __init__(self, start_point, finish_point, name, loc_coordinate_from, loc_coordinate_to, neighbor_name):
+    def __init__(self, start_point, finish_point, name, in_point, out_point, neighbor_name):
         self.start_point = start_point
         self.finish_point = finish_point
         self.name = name
@@ -13,8 +13,8 @@ class Figure:
         self.figures_queue = []
         # Поля для связи конвейера с фигурами
         # TODO пока в ручном режиме задую I/O агрегатов, в placement pins заранее известны
-        self.in_point = Coordinate(start_point.x + loc_coordinate_from.x, start_point.y + loc_coordinate_from.y - 1)
-        self.out_point = Coordinate(start_point.x + loc_coordinate_to.x, start_point.y + loc_coordinate_to.y - 1)
+        self.in_point = in_point
+        self.out_point = out_point
 
     def create_figure_queue(self):
         delta_x = self.finish_point.x - self.start_point.x

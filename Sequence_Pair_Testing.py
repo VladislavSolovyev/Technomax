@@ -145,9 +145,41 @@ class TransformSeqPair:
                     x_y_SP_coordinates[0][i] + seq_pair.wid_hei_dict[i + 1][0] - 1,
                     x_y_SP_coordinates[1][i] + seq_pair.wid_hei_dict[i + 1][1] - 1
                 ),
+
                 seq_pair.wid_hei_dict[i + 1][2],
-                seq_pair.wid_hei_dict[i + 1][3],
-                seq_pair.wid_hei_dict[i + 1][4],
+
+                Coordinate(
+                    x_y_SP_coordinates[0][i] +\
+                        + (1 - seq_pair.wid_hei_dict[i + 1][6][0]) * (1 - seq_pair.wid_hei_dict[i + 1][6][1]) * seq_pair.wid_hei_dict[i + 1][3].x +\
+                        + seq_pair.wid_hei_dict[i + 1][3].y * seq_pair.wid_hei_dict[i + 1][6][0] * (1 - seq_pair.wid_hei_dict[i + 1][6][1]) +\
+                        + (seq_pair.wid_hei_dict[i + 1][0] - seq_pair.wid_hei_dict[i + 1][3].x) * (1 - seq_pair.wid_hei_dict[i + 1][6][0]) * seq_pair.wid_hei_dict[i + 1][6][1] +\
+                        + (seq_pair.wid_hei_dict[i + 1][1] - seq_pair.wid_hei_dict[i + 1][3].y) * seq_pair.wid_hei_dict[i + 1][6][0] * seq_pair.wid_hei_dict[i + 1][6][1]
+                        + 1,
+
+                    x_y_SP_coordinates[1][i] + \
+                        + (1 - seq_pair.wid_hei_dict[i + 1][6][0]) * (1 - seq_pair.wid_hei_dict[i + 1][6][1]) * seq_pair.wid_hei_dict[i + 1][3].y +\
+                        + (seq_pair.wid_hei_dict[i + 1][0] - seq_pair.wid_hei_dict[i + 1][3].x) * seq_pair.wid_hei_dict[i + 1][6][0] * (1 - seq_pair.wid_hei_dict[i + 1][6][1]) +\
+                        + (seq_pair.wid_hei_dict[i + 1][1] - seq_pair.wid_hei_dict[i + 1][3].y) * (1 - seq_pair.wid_hei_dict[i + 1][6][0]) * seq_pair.wid_hei_dict[i + 1][6][1] +\
+                        + seq_pair.wid_hei_dict[i + 1][3].x * seq_pair.wid_hei_dict[i + 1][6][0] * seq_pair.wid_hei_dict[i + 1][6][1]
+                        + 1
+                ),
+
+                Coordinate(
+                    x_y_SP_coordinates[0][i] + \
+                        + (1 - seq_pair.wid_hei_dict[i + 1][6][0]) * (1 - seq_pair.wid_hei_dict[i + 1][6][1]) * seq_pair.wid_hei_dict[i + 1][4].x + \
+                        + seq_pair.wid_hei_dict[i + 1][4].y * seq_pair.wid_hei_dict[i + 1][6][0] * (1 - seq_pair.wid_hei_dict[i + 1][6][1]) + \
+                        + (seq_pair.wid_hei_dict[i + 1][0] - seq_pair.wid_hei_dict[i + 1][4].x) * (1 - seq_pair.wid_hei_dict[i + 1][6][0]) * seq_pair.wid_hei_dict[i + 1][6][1] + \
+                        + (seq_pair.wid_hei_dict[i + 1][1] - seq_pair.wid_hei_dict[i + 1][4].y) * seq_pair.wid_hei_dict[i + 1][6][0] * seq_pair.wid_hei_dict[i + 1][6][1]
+                        + 0,
+
+                    x_y_SP_coordinates[1][i] + \
+                        + (1 - seq_pair.wid_hei_dict[i + 1][6][0]) * (1 - seq_pair.wid_hei_dict[i + 1][6][1]) * seq_pair.wid_hei_dict[i + 1][4].y + \
+                        + (seq_pair.wid_hei_dict[i + 1][0] - seq_pair.wid_hei_dict[i + 1][4].x) * seq_pair.wid_hei_dict[i + 1][6][0] * (1 - seq_pair.wid_hei_dict[i + 1][6][1]) + \
+                        + (seq_pair.wid_hei_dict[i + 1][1] - seq_pair.wid_hei_dict[i + 1][4].y) * (1 - seq_pair.wid_hei_dict[i + 1][6][0]) * seq_pair.wid_hei_dict[i + 1][6][1] + \
+                        + seq_pair.wid_hei_dict[i + 1][4].x * seq_pair.wid_hei_dict[i + 1][6][0] * seq_pair.wid_hei_dict[i + 1][6][1]
+                        + 1
+                ),
+
                 seq_pair.wid_hei_dict[i + 1][5],
             )
             figures.append(figure)
@@ -223,11 +255,10 @@ class SimAnnealing:
             seq_pair.wid_hei_dict[rand_ind][1], seq_pair.wid_hei_dict[rand_ind][0]
 
         # TODO чтобы повернуть на 90* нужно поменять на 1 число в (ui, vi)
-        seq_pair.wid_hei_dict[rand_ind][3].x, seq_pair.wid_hei_dict[rand_ind][3].y = \
-            seq_pair.wid_hei_dict[rand_ind][3].y, seq_pair.wid_hei_dict[rand_ind][3].x
-
-        seq_pair.wid_hei_dict[rand_ind][4].x, seq_pair.wid_hei_dict[rand_ind][4].y = \
-            seq_pair.wid_hei_dict[rand_ind][4].y - 2, seq_pair.wid_hei_dict[rand_ind][4].x + 2
+        if seq_pair.wid_hei_dict[rand_ind][6][0] == 1:
+            seq_pair.wid_hei_dict[rand_ind][6][0] = 0
+        else:
+            seq_pair.wid_hei_dict[rand_ind][6][0] = 1
 
         '''
         seq_pair.wid_hei_dict[rand_ind][3].x, seq_pair.wid_hei_dict[rand_ind][4].y = \
